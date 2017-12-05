@@ -1,9 +1,11 @@
 #ifndef MCMC_METROPOLIS_HASTINGS_SAMPLER_HPP_
 #define MCMC_METROPOLIS_HASTINGS_SAMPLER_HPP_
 
+#include <random>
+
 namespace mcmc
 {
-template<typename data_type>
+template<typename type, typename prior_distribution = std::gamma_distribution<type>, typename likelihood_distribution = std::normal_distribution<type>>
 class metropolis_hastings_sampler
 {
 public:
