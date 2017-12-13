@@ -15,7 +15,6 @@ set(PROJECT_SOURCES
   
   include/mcmc/gibbs_sampler.hpp
   include/mcmc/markov_chain.hpp
-  include/mcmc/markov_chain_state.hpp
   include/mcmc/metropolis_hastings_sampler.hpp
   include/mcmc/monte_carlo.hpp
 )
@@ -49,7 +48,6 @@ if(BUILD_TESTS)
   set(PROJECT_TEST_SOURCES
   	tests/gibbs_sampler_test.cpp
     tests/markov_chain_test.cpp
-    tests/markov_chain_state_test.cpp
   	tests/metropolis_hastings_sampler_test.cpp
   	tests/monte_carlo_test.cpp
   )
