@@ -12,9 +12,12 @@ public:
   virtual ~gibbs_sampler  ()                           = default;
   gibbs_sampler& operator=(const gibbs_sampler&  that) = default;
   gibbs_sampler& operator=(      gibbs_sampler&& temp) = default;
+  
+  template<typename state_type>
+  state_type apply(const state_type& state) const
+  {
 
-protected:
-
+  }
 };
 }
 
