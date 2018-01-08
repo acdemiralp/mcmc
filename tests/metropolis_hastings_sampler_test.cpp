@@ -4,5 +4,7 @@
 
 TEST_CASE("Metropolis-Hastings sampler is tested.", "[mcmc::metropolis_hastings_sampler]") 
 {
+  mcmc::metropolis_hastings_sampler<float> sampler;
 
+  REQUIRE(false);
 }

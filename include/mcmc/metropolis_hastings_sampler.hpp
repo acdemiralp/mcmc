@@ -13,8 +13,10 @@ template<
 class metropolis_hastings_sampler
 {
 public:
-  metropolis_hastings_sampler           (prior_distribution_type prior_distribution, likelihood_distribution_type likelihood_distribution) 
-  : mersenne_twister_(random_device_), prior_distribution_(prior_distribution), likelihood_distribution_(likelihood_distribution)
+  explicit metropolis_hastings_sampler  (
+    prior_distribution_type      prior_distribution      = prior_distribution_type     (), 
+    likelihood_distribution_type likelihood_distribution = likelihood_distribution_type()) 
+  : mersenne_twister_(random_device_()), prior_distribution_(prior_distribution), likelihood_distribution_(likelihood_distribution)
   {
     static_assert(!std::is_function<prior_distribution_type>::value     , "Prior distribution is not a function."     );
     static_assert(!std::is_function<likelihood_distribution_type>::value, "Likelihood distribution is not a function.");

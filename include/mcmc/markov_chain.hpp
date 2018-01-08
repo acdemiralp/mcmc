@@ -34,6 +34,8 @@ public:
   }
 
 protected:
+  // The states prior to the last state have no effect on the update (as per definition of a Markov chain). 
+  // They are nevertheless stored for retrospection purposes.
   std::vector<state_type> state_history_;
 };
 }
