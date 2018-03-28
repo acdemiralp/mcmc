@@ -2,9 +2,12 @@
 #define MCMC_MONTE_CARLO_HPP_
 
 #include <algorithm>
+#include <cstddef>
 #include <functional>
 #include <numeric>
-#include <random>
+#include <vector>
+
+#include <mcmc/random_number_generator.hpp>
 
 namespace mcmc
 {
@@ -28,22 +31,13 @@ public:
 
   data_type simulate(const std::size_t& sampling_count)
   {
-    std::random_device                       random_device   ;
-    std::mt19937                             mersenne_twister(random_device());
-    std::uniform_real_distribution<rng_type> distribution    ;
-    auto rng_function = [&mersenne_twister, &distribution] ()
-    {
-      return distribution(mersenne_twister);
-    };
+    random_number_generator<rng_type> rng;
 
     std::vector<data_type> intermediates(sampling_count);
     std::generate_n(
       intermediates.begin(),
       intermediates.size (),
-      [&]
-      { 
-        return sampling_function_(rng_function); 
-      });
+      [&] { return sampling_function_(rng.function()); });
 
     return std::accumulate(
       intermediates.begin(), 

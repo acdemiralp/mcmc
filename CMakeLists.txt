@@ -17,6 +17,7 @@ set(PROJECT_SOURCES
   include/mcmc/markov_chain.hpp
   include/mcmc/metropolis_hastings_sampler.hpp
   include/mcmc/monte_carlo.hpp
+  include/mcmc/random_number_generator.hpp
 )
 include(assign_source_group)
 assign_source_group(${PROJECT_SOURCES})

@@ -1,6 +1,8 @@
 #ifndef MCMC_METROPOLIS_HASTINGS_SAMPLER_HPP_
 #define MCMC_METROPOLIS_HASTINGS_SAMPLER_HPP_
 
+#include <algorithm>
+
 #include <random>
 #include <type_traits>
 
@@ -41,9 +43,11 @@ public:
   }
 
 protected:
-  std::random_device                   random_device_          ;
-  std::mt19937                         mersenne_twister_       ;  
+  std::array<std::random_device, 2>    random_device_          ;
+  std::array<std::mt19937      , 2>    mersenne_twister_       ;  
   std::uniform_real_distribution<type> uniform_distribution_   ;
+  std::normal_distribution      <type> normal_distribution_    ;
+
   prior_distribution_type              prior_distribution_     ;
   likelihood_distribution_type         likelihood_distribution_;
 };
