@@ -2,23 +2,29 @@
 #define MCMC_METROPOLIS_HASTINGS_SAMPLER_HPP_
 
 #include <algorithm>
-
 #include <random>
 #include <type_traits>
+
+#include <mcmc/random_number_generator.hpp>
 
 namespace mcmc
 {
 template<
-  typename type, 
+  typename data_type      = std::array<float, 2 >,
+  typename parameter_type = std::array<float, 12>,
+
+  typename type          , 
   typename prior_distribution_type      = std::gamma_distribution <type>, 
-  typename likelihood_distribution_type = std::normal_distribution<type>>
+  typename likelihood_distribution_type = std::normal_distribution<type>,
+  typename density_test_function_type   = std::function<void()>>
 class metropolis_hastings_sampler
 {
 public:
   explicit metropolis_hastings_sampler  (
     prior_distribution_type      prior_distribution      = prior_distribution_type     (), 
     likelihood_distribution_type likelihood_distribution = likelihood_distribution_type()) 
-  : mersenne_twister_(random_device_()), prior_distribution_(prior_distribution), likelihood_distribution_(likelihood_distribution)
+  : prior_distribution_     (prior_distribution     )
+  , likelihood_distribution_(likelihood_distribution)
   {
     static_assert(!std::is_function<prior_distribution_type>::value     , "Prior distribution is not a function."     );
     static_assert(!std::is_function<likelihood_distribution_type>::value, "Likelihood distribution is not a function.");
@@ -39,17 +45,14 @@ public:
     const auto a  = 0.0F;
     
     // Accept or reject step.
-    return uniform_distribution_(mersenne_twister_) <= a ? xp : state;
+    return uniform_rng_.generate() <= a ? xp : state;
   }
 
 protected:
-  std::array<std::random_device, 2>    random_device_          ;
-  std::array<std::mt19937      , 2>    mersenne_twister_       ;  
-  std::uniform_real_distribution<type> uniform_distribution_   ;
-  std::normal_distribution      <type> normal_distribution_    ;
-
-  prior_distribution_type              prior_distribution_     ;
-  likelihood_distribution_type         likelihood_distribution_;
+  random_number_generator<type, std::uniform_real_distribution<type>> uniform_rng_            ;
+  random_number_generator<type, std::normal_distribution<type>>       normal_rng_             ;
+  prior_distribution_type                                             prior_distribution_     ;
+  likelihood_distribution_type                                        likelihood_distribution_;
 };
 }
 
