@@ -10,13 +10,11 @@
 namespace mcmc
 {
 template<
-  typename data_type      = std::array<float, 2 >,
-  typename parameter_type = std::array<float, 12>,
-
-  typename type          , 
-  typename prior_distribution_type      = std::gamma_distribution <type>, 
-  typename likelihood_distribution_type = std::normal_distribution<type>,
-  typename density_test_function_type   = std::function<void()>>
+  typename data_type                    ,
+  typename parameter_type               ,
+  typename model_function_type          ,
+  typename prior_distribution_type      = std::gamma_distribution <double>, 
+  typename likelihood_distribution_type = std::normal_distribution<double>>
 class metropolis_hastings_sampler
 {
 public:
@@ -49,10 +47,11 @@ public:
   }
 
 protected:
-  random_number_generator<type, std::uniform_real_distribution<type>> uniform_rng_            ;
-  random_number_generator<type, std::normal_distribution<type>>       normal_rng_             ;
-  prior_distribution_type                                             prior_distribution_     ;
-  likelihood_distribution_type                                        likelihood_distribution_;
+  random_number_generator<type, prior_distribution_type>      uniform_rng_            ;
+  random_number_generator<type, likelihood_distribution_type> normal_rng_             ;
+  model_function_type                                         model_function_         ;
+  prior_distribution_type                                     prior_distribution_     ;
+  likelihood_distribution_type                                likelihood_distribution_;
 };
 }
 
