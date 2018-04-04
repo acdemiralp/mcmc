@@ -23,12 +23,14 @@ TEST_CASE("Metropolis-Hastings sampler is tested.", "[mcmc::metropolis_hastings_
   Eigen::MatrixXf covariance_matrix(1, 1);
   covariance_matrix.setIdentity();
 
-  auto kernel_function = [ ] (const Eigen::VectorXf state) -> float 
-  {
-    return normal_distribution_density(state[0], 500.0f, 0.1f, true);
-  };
+  mcmc::metropolis_hastings_sampler<Eigen::VectorXf, Eigen::VectorXf, std::fisher_f_distribution<float>> metropolis_hastings_sampler(
+    [ ] (const Eigen::VectorXf state)
+    {
+      return normal_distribution_density(state[0], 500.0f, 0.1f, true);
+    },
+    covariance_matrix, 
+    100.0f);
 
-  mcmc::metropolis_hastings_sampler<decltype(kernel_function), Eigen::VectorXf, Eigen::VectorXf, std::fisher_f_distribution<float>> metropolis_hastings_sampler(kernel_function, covariance_matrix, 100.0f);
   mcmc::markov_chain<Eigen::VectorXf> markov_chain(initial_state);
   for(auto i = 0; i < 1000000; ++i)
   {

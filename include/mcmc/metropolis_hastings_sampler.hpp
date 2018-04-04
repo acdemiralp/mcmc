@@ -14,7 +14,6 @@
 namespace mcmc
 {
 template<
-  typename kernel_function_type       ,
   typename state_type                 = Eigen::VectorXf,
   typename covariance_matrix_type     = Eigen::MatrixXf,
   typename proposal_distribution_type = std::normal_distribution<float>>
