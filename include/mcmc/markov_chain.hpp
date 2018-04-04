@@ -19,10 +19,10 @@ public:
   markov_chain& operator=(const markov_chain&  that) = default;
   markov_chain& operator=(      markov_chain&& temp) = default;
 
-  template<typename update_strategy, typename... argument_types>
-  void                           update       (argument_types&&... arguments)
+  template<typename update_strategy_type, typename... argument_types>
+  void                           update       (update_strategy_type& update_strategy, argument_types&&... arguments)
   {
-    state_history_.push_back(update_strategy::apply(state_history_[state_history_.size() - 1], arguments...));
+    state_history_.push_back(update_strategy.apply(state_history_[state_history_.size() - 1], arguments...));
   }
   const state_type&              state        () const
   {
