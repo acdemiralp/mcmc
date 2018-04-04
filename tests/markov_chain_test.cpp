@@ -35,7 +35,8 @@ TEST_CASE("Markov chain is tested.", "[mcmc::markov_chain]")
           return state;
         }
       };
-      markov_chain.update<state_inversion_strategy>();
+      const  state_inversion_strategy strategy;
+      markov_chain.update(strategy);
 
       auto inverted_state = initial_state;
       std::reverse(inverted_state.begin(), inverted_state.end());
