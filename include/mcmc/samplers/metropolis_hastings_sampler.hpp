@@ -23,7 +23,7 @@ public:
   template<typename... arguments_type>
   explicit metropolis_hastings_sampler  (
     const std::function<float(const state_type&)>& kernel_function       ,
-    const covariance_matrix_type&                  covariance_matrix     ,
+    const covariance_matrix_type&                  covariance_matrix     , // Identity when Gibbs sampling.
     const float                                    scale                 = 1.0f,
     const proposal_distribution_type&              proposal_distribution = proposal_distribution_type())
   : kernel_function_  (kernel_function      )
