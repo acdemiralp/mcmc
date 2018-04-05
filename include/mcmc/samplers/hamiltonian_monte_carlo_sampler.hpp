@@ -13,11 +13,29 @@
 
 namespace mcmc
 {
-template<typename state_type = Eigen::VectorXf>
+template<
+  typename state_type                 = Eigen::VectorXf,
+  typename precondition_matrix_type   = Eigen::MatrixXf,
+  typename proposal_distribution_type = std::normal_distribution<float>>
 class hamiltonian_monte_carlo_sampler
 {
 public:
-  hamiltonian_monte_carlo_sampler           ()                                             = default;
+  template<typename... arguments_type>
+  explicit hamiltonian_monte_carlo_sampler(
+    const std::function<float(const state_type&, state_type&)>& kernel_function       ,
+    const precondition_matrix_type&                             precondition_matrix   ,
+    const std::uint32_t                                         leaps                 = 1,
+    const float                                                 step_size             = 1.0f,
+    const float                                                 scale                 = 1.0f,
+    const proposal_distribution_type&                           proposal_distribution = proposal_distribution_type())
+  : kernel_function_    (kernel_function      )
+  , precondition_matrix_((std::pow(scale, 2) * precondition_matrix).inverse().llt().matrixLLT())
+  , proposal_rng_       (proposal_distribution)
+  , acceptance_rng_     (0.0f, 1.0f           )
+  , last_density_       (0.0f                 )
+  {
+
+  }
   hamiltonian_monte_carlo_sampler           (const hamiltonian_monte_carlo_sampler&  that) = default;
   hamiltonian_monte_carlo_sampler           (      hamiltonian_monte_carlo_sampler&& temp) = default;
   virtual ~hamiltonian_monte_carlo_sampler  ()                                             = default;
@@ -30,7 +48,11 @@ public:
   }
 
 protected:
-
+  std::function<float(const state_type&, state_type&)>           kernel_function_    ;
+  precondition_matrix_type                                       precondition_matrix_;
+  random_number_generator<proposal_distribution_type>            proposal_rng_       ;
+  random_number_generator<std::uniform_real_distribution<float>> acceptance_rng_     ;
+  float                                                          last_density_       ;
 };
 }
 
