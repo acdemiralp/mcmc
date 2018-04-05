@@ -12,11 +12,15 @@ set(PROJECT_SOURCES
   CMakeLists.txt
   cmake/assign_source_group.cmake
   cmake/import_library.cmake
-  
-  include/mcmc/gibbs_sampler.hpp
+  readme.md
+
+  include/mcmc/samplers/adaptive_equi_energy_sampler.hpp
+  include/mcmc/samplers/differential_evolution_sampler.hpp
+  include/mcmc/samplers/hamiltonian_monte_carlo_sampler.hpp
+  include/mcmc/samplers/metropolis_adjusted_langevin_sampler.hpp
+  include/mcmc/samplers/metropolis_hastings_sampler.hpp
+  include/mcmc/samplers/riemannian_manifold_hamiltonian_monte_carlo_sampler.hpp
   include/mcmc/markov_chain.hpp
-  include/mcmc/metropolis_hastings_sampler.hpp
-  include/mcmc/monte_carlo.hpp
   include/mcmc/random_number_generator.hpp
 )
 include(assign_source_group)
@@ -47,10 +51,8 @@ if(BUILD_TESTS)
   enable_testing()
 
   set(PROJECT_TEST_SOURCES
-  	tests/gibbs_sampler_test.cpp
     tests/markov_chain_test.cpp
-  	tests/metropolis_hastings_sampler_test.cpp
-  	tests/monte_carlo_test.cpp
+  	tests/sampler_test.cpp
   )
 
   foreach(_SOURCE ${PROJECT_TEST_SOURCES})

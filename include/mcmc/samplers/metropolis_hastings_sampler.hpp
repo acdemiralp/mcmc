@@ -2,12 +2,12 @@
 #define MCMC_METROPOLIS_HASTINGS_SAMPLER_HPP_
 
 #include <algorithm>
+#include <functional>
 #include <math.h>
 #include <random>
-#include <type_traits>
 
 #include <external/Eigen/Cholesky>
-#include <external/Eigen/Dense>
+#include <external/Eigen/Core>
 
 #include <mcmc/random_number_generator.hpp>
 
@@ -29,7 +29,7 @@ public:
   : kernel_function_  (kernel_function      )
   , covariance_matrix_((std::pow(scale, 2) * covariance_matrix).llt().matrixLLT())
   , proposal_rng_     (proposal_distribution)
-  , accept_rng_       (0.0f, 1.0f           )
+  , acceptance_rng_   (0.0f, 1.0f           )
   , last_density_     (0.0f                 )
   {
 
@@ -48,7 +48,7 @@ public:
     state_type  next_state = state + covariance_matrix_ * random_vector;
     const float density    = kernel_function_(next_state);
 
-    if (std::exp(std::min(0.0f, density - last_density_)) < accept_rng_.generate()) 
+    if (std::exp(std::min(0.0f, density - last_density_)) < acceptance_rng_.generate()) 
       return state;
     
     last_density_ = density;
@@ -59,7 +59,7 @@ protected:
   std::function<float(const state_type&)>                        kernel_function_  ;
   covariance_matrix_type                                         covariance_matrix_;
   random_number_generator<proposal_distribution_type>            proposal_rng_     ;
-  random_number_generator<std::uniform_real_distribution<float>> accept_rng_       ;
+  random_number_generator<std::uniform_real_distribution<float>> acceptance_rng_   ;
   float                                                          last_density_     ;
 };
 }

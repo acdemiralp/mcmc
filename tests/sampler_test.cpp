@@ -3,8 +3,13 @@
 #include <fstream>
 #include <iostream>
 
+#include <mcmc/samplers/adaptive_equi_energy_sampler.hpp>
+#include <mcmc/samplers/differential_evolution_sampler.hpp>
+#include <mcmc/samplers/hamiltonian_monte_carlo_sampler.hpp>
+#include <mcmc/samplers/metropolis_adjusted_langevin_sampler.hpp>
+#include <mcmc/samplers/metropolis_hastings_sampler.hpp>
+#include <mcmc/samplers/riemannian_manifold_hamiltonian_monte_carlo_sampler.hpp>
 #include <mcmc/markov_chain.hpp>
-#include <mcmc/metropolis_hastings_sampler.hpp>
 
 double normal_distribution_density(
   double       x           , 
