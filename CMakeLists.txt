@@ -16,6 +16,7 @@ set(PROJECT_SOURCES
 
   include/mcmc/samplers/adaptive_equi_energy_sampler.hpp
   include/mcmc/samplers/differential_evolution_sampler.hpp
+  include/mcmc/samplers/gibbs_sampler.hpp
   include/mcmc/samplers/hamiltonian_monte_carlo_sampler.hpp
   include/mcmc/samplers/metropolis_adjusted_langevin_sampler.hpp
   include/mcmc/samplers/random_walk_metropolis_hastings_sampler.hpp
