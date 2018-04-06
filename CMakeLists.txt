@@ -18,7 +18,7 @@ set(PROJECT_SOURCES
   include/mcmc/samplers/differential_evolution_sampler.hpp
   include/mcmc/samplers/hamiltonian_monte_carlo_sampler.hpp
   include/mcmc/samplers/metropolis_adjusted_langevin_sampler.hpp
-  include/mcmc/samplers/metropolis_hastings_sampler.hpp
+  include/mcmc/samplers/random_walk_metropolis_hastings_sampler.hpp
   include/mcmc/samplers/riemannian_manifold_hamiltonian_monte_carlo_sampler.hpp
   include/mcmc/markov_chain.hpp
   include/mcmc/random_number_generator.hpp
