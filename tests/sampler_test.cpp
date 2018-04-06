@@ -22,7 +22,7 @@ double normal_distribution_density(
   return logarithmic ? -(0.918938533204672741780329736406 + 0.5 * x * x + log(sigma)) : 0.398942280401432677939946059934 * exp(-0.5 * x * x) / sigma;
 }
 
-TEST_CASE("Random Walk Metropolis-Hastings sampler is tested.", "[mcmc::random_walk_metropolis_hastings_sampler]")
+/* TEST_CASE("Random Walk Metropolis-Hastings sampler is tested.", "[mcmc::random_walk_metropolis_hastings_sampler]")
 {
   Eigen::VectorXf initial_state(1);
   initial_state[0] = 450.0f;
@@ -47,7 +47,40 @@ TEST_CASE("Random Walk Metropolis-Hastings sampler is tested.", "[mcmc::random_w
     std::cout << markov_chain.state().format(Eigen::IOFormat()) << "\n"; // In-situ.
   }
 
-  std::ofstream file("output.csv");
+  std::ofstream file("output_rwmh.csv");
+  for (auto state : markov_chain.state_history())
+    file << state.format(Eigen::IOFormat()) << "\n";
+} */
+TEST_CASE("Hamiltonian Monte Carlo sampler is tested."        , "[mcmc::hamiltonian_monte_carlo_sampler]")
+{
+  Eigen::VectorXf initial_state(1);
+  initial_state[0] = 500.0f;
+
+  Eigen::VectorXf momentum(1);
+  initial_state[0] = 0.0f;
+
+  Eigen::MatrixXf precondition_matrix(1, 1);
+  precondition_matrix.setIdentity();
+
+  mcmc::hamiltonian_monte_carlo_sampler<Eigen::VectorXf, Eigen::MatrixXf, std::normal_distribution<float>> hamiltonian_monte_carlo_sampler(
+    [ ] (const Eigen::VectorXf& state, Eigen::VectorXf* gradients)
+    {
+      return normal_distribution_density(state[0], 500.0f, 1.0f, true);
+    },
+    precondition_matrix,
+    20,
+    100.0f);
+
+  const auto iterations = 100000;
+
+  mcmc::markov_chain<Eigen::VectorXf> markov_chain(initial_state);
+  for(auto i = 0; i < iterations; ++i)
+  {
+    markov_chain.update(hamiltonian_monte_carlo_sampler, &momentum);
+    std::cout << markov_chain.state().format(Eigen::IOFormat()) << "\n"; // In-situ.
+  }
+
+  std::ofstream file("output_hmc.csv");
   for (auto state : markov_chain.state_history())
     file << state.format(Eigen::IOFormat()) << "\n";
 }
