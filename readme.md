@@ -1,5 +1,42 @@
+## Getting Started ##
+Copy the include folder to your project. Done.
+
+## Example Usage (Random Walk a Normal distribution) ##
+```cpp
+#include <mcmc/samplers/random_walk_metropolis_hastings_sampler.hpp>
+#include <mcmc/markov_chain.hpp>
+
+void main()
+{
+  Eigen::VectorXf initial_state(1);
+  initial_state[0] = 450.0f;
+  
+  Eigen::MatrixXf covariance_matrix(1, 1);
+  covariance_matrix.setIdentity();
+
+  mcmc::random_walk_metropolis_hastings_sampler<Eigen::VectorXf, Eigen::MatrixXf> sampler(
+    [ ] (const Eigen::VectorXf& state)
+    {
+      return normal_distribution_density(state[0], 500.0f, 1.0f, true);
+    },
+    covariance_matrix, 
+    100.0f);
+
+  mcmc::markov_chain<Eigen::VectorXf> markov_chain(initial_state);
+  for(auto i = 0; i < 100000; ++i)
+  {
+    markov_chain.update(sampler);
+    std::cout << markov_chain.state().format(Eigen::IOFormat()) << "\n";
+  }
+}
+```
+See the tests for the details and usage of individual samplers.
+
+## Notes ##
+All kernel functions should return logarithmic scale values unless explicitly stated otherwise.
+
 ## Coverage ##
-The following list is based on https://m-clark.github.io/docs/ld_mcmc/index_onepage.html with a few extensions. Please inform if anything is missing.
+The following list is based on https://m-clark.github.io/docs/ld_mcmc/index_onepage.html with a few extensions. Please feel free to add any missing samplers.
 - [ ] Adaptive Directional Metropolis-within-Gibbs
 - [x] Adaptive Equi-Energy Sampler
 - [ ] Adaptive Griddy-Gibbs
@@ -46,10 +83,6 @@ The following list is based on https://m-clark.github.io/docs/ld_mcmc/index_onep
 - [ ] Univariate Eigenvector Slice Sampler
 - [ ] Updating Sequential Adaptive Metropolis-within-Gibbs
 - [ ] Updating Sequential Metropolis-within-Gibbs
-
-## Notes ##
-See the tests for usage of the individual samplers.
-All kernel functions are expected to return logarithmic scale values.
 
 ## Acknowledgements ##
 The majority of the samplers in this library are inspired by Keith O'Hara's library with the same name: https://github.com/kthohr/mcmc
