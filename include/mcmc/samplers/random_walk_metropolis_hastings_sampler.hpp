@@ -22,15 +22,15 @@ class random_walk_metropolis_hastings_sampler
 public:
   template<typename... arguments_type>
   explicit random_walk_metropolis_hastings_sampler  (
-    const std::function<float(const state_type&)>& kernel_function       , // Expects logarithmic return values.
+    const std::function<float(const state_type&)>& log_kernel_function   ,
     const covariance_matrix_type&                  covariance_matrix     ,
     const float                                    scale                 = 1.0f,
     const proposal_distribution_type&              proposal_distribution = proposal_distribution_type())
-  : kernel_function_  (kernel_function)
-  , covariance_matrix_((std::pow(scale, 2) * covariance_matrix).llt().matrixLLT())
-  , proposal_rng_     (proposal_distribution)
-  , acceptance_rng_   (0.0f, 1.0f)
-  , last_log_density_ (0.0f)
+  : log_kernel_function_ (log_kernel_function)
+  , covariance_matrix_   ((std::pow(scale, 2) * covariance_matrix).llt().matrixLLT())
+  , proposal_rng_        (proposal_distribution)
+  , acceptance_rng_      (0.0f, 1.0f)
+  , log_lebesque_density_(0.0f)
   {
 
   }
@@ -45,22 +45,22 @@ public:
     state_type random_vector(state.size());
     std::generate_n(&random_vector[0], random_vector.size(), proposal_rng_.function());
 
-    state_type next_state = state + covariance_matrix_ * random_vector;
-    const auto density    = kernel_function_(next_state);
+    state_type next_state           = state + covariance_matrix_ * random_vector;
+    const auto log_lebesque_density = log_kernel_function_(next_state);
 
-    if (std::min(0.0f, density - last_log_density_) < std::log(acceptance_rng_.generate())) 
+    if (std::exp(std::min(0.0f, log_lebesque_density - log_lebesque_density_)) < acceptance_rng_.generate()) 
       return state;
     
-    last_log_density_ = density;
+    log_lebesque_density_ = log_lebesque_density;
     return next_state;
   }
 
 protected:
-  std::function<float(const state_type&)>                        kernel_function_  ;
-  covariance_matrix_type                                         covariance_matrix_;
-  random_number_generator<proposal_distribution_type>            proposal_rng_     ;
-  random_number_generator<std::uniform_real_distribution<float>> acceptance_rng_   ;
-  float                                                          last_log_density_ ;
+  std::function<float(const state_type&)>                        log_kernel_function_ ;
+  covariance_matrix_type                                         covariance_matrix_   ;
+  random_number_generator<proposal_distribution_type>            proposal_rng_        ;
+  random_number_generator<std::uniform_real_distribution<float>> acceptance_rng_      ;
+  float                                                          log_lebesque_density_;
 };
 }
 

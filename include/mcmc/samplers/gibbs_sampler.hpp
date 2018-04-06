@@ -59,12 +59,12 @@ public:
   }
 
 protected:
-  std::function<float(const state_type&)>                              kernel_function_  ;
-  covariance_matrix_type                                               covariance_matrix_;
-  random_number_generator<std::uniform_real_distribution<std::size_t>> selection_rng_    ;
-  random_number_generator<proposal_distribution_type>                  proposal_rng_     ;
-  random_number_generator<std::uniform_real_distribution<float>>       acceptance_rng_   ;
-  float                                                                last_log_density_ ;
+  std::function<float(const state_type&)>                             kernel_function_  ;
+  covariance_matrix_type                                              covariance_matrix_;
+  random_number_generator<std::uniform_int_distribution<std::size_t>> selection_rng_    ;
+  random_number_generator<proposal_distribution_type>                 proposal_rng_     ;
+  random_number_generator<std::uniform_real_distribution<float>>      acceptance_rng_   ;
+  float                                                               last_log_density_ ;
 };
 }
 
