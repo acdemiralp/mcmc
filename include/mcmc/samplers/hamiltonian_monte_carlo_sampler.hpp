@@ -26,15 +26,20 @@ public:
     const precondition_matrix_type&                             precondition_matrix   ,
     const std::uint32_t                                         leaps                 = 1,
     const float                                                 step_size             = 1.0f,
-    const float                                                 scale                 = 1.0f,
     const proposal_distribution_type&                           proposal_distribution = proposal_distribution_type())
-  : kernel_function_    (kernel_function      )
-  , precondition_matrix_((std::pow(scale, 2) * precondition_matrix).inverse().llt().matrixLLT())
-  , proposal_rng_       (proposal_distribution)
-  , acceptance_rng_     (0.0f, 1.0f           )
-  , last_density_       (0.0f                 )
+  : kernel_function_            (kernel_function)
+  , precondition_matrix_        (precondition_matrix.llt().matrixLLT())
+  , inverse_precondition_matrix_(precondition_matrix.inverse())
+  , leaps_                      (leaps)
+  , step_size_                  (step_size)
+  , proposal_rng_               (proposal_distribution)
+  , acceptance_rng_             (0.0f, 1.0f)
+  , last_log_density_           (0.0f)
   {
-
+    momentum_function_ = [ ] ()
+    {
+      
+    };
   }
   hamiltonian_monte_carlo_sampler           (const hamiltonian_monte_carlo_sampler&  that) = default;
   hamiltonian_monte_carlo_sampler           (      hamiltonian_monte_carlo_sampler&& temp) = default;
@@ -48,11 +53,15 @@ public:
   }
 
 protected:
-  std::function<float(const state_type&, state_type&)>           kernel_function_    ;
-  precondition_matrix_type                                       precondition_matrix_;
-  random_number_generator<proposal_distribution_type>            proposal_rng_       ;
-  random_number_generator<std::uniform_real_distribution<float>> acceptance_rng_     ;
-  float                                                          last_density_       ;
+  std::function<float(const state_type&, state_type&)>           kernel_function_            ;
+  std::function<float(const state_type&, state_type&)>           momentum_function_          ;
+  precondition_matrix_type                                       precondition_matrix_        ;
+  precondition_matrix_type                                       inverse_precondition_matrix_;
+  std::uint32_t                                                  leaps_                      ;
+  float                                                          step_size_                  ;
+  random_number_generator<proposal_distribution_type>            proposal_rng_               ;
+  random_number_generator<std::uniform_real_distribution<float>> acceptance_rng_             ;
+  float                                                          last_log_density_           ;
 };
 }
 
