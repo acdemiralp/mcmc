@@ -5,9 +5,10 @@
 
 #include <mcmc/samplers/adaptive_equi_energy_sampler.hpp>
 #include <mcmc/samplers/differential_evolution_sampler.hpp>
+#include <mcmc/samplers/gibbs_sampler.hpp>
 #include <mcmc/samplers/hamiltonian_monte_carlo_sampler.hpp>
 #include <mcmc/samplers/metropolis_adjusted_langevin_sampler.hpp>
-#include <mcmc/samplers/metropolis_hastings_sampler.hpp>
+#include <mcmc/samplers/random_walk_metropolis_hastings_sampler.hpp>
 #include <mcmc/samplers/riemannian_manifold_hamiltonian_monte_carlo_sampler.hpp>
 #include <mcmc/markov_chain.hpp>
 
@@ -21,7 +22,7 @@ double normal_distribution_density(
   return logarithmic ? -(0.918938533204672741780329736406 + 0.5 * x * x + log(sigma)) : 0.398942280401432677939946059934 * exp(-0.5 * x * x) / sigma;
 }
 
-TEST_CASE("Metropolis-Hastings sampler is tested.", "[mcmc::metropolis_hastings_sampler]")
+TEST_CASE("Random Walk Metropolis-Hastings sampler is tested.", "[mcmc::random_walk_metropolis_hastings_sampler]")
 {
   Eigen::VectorXf initial_state(1);
   initial_state[0] = 450.0f;
@@ -29,7 +30,7 @@ TEST_CASE("Metropolis-Hastings sampler is tested.", "[mcmc::metropolis_hastings_
   Eigen::MatrixXf covariance_matrix(1, 1);
   covariance_matrix.setIdentity();
 
-  mcmc::metropolis_hastings_sampler<Eigen::VectorXf, Eigen::MatrixXf, std::normal_distribution<float>> metropolis_hastings_sampler(
+  mcmc::random_walk_metropolis_hastings_sampler<Eigen::VectorXf, Eigen::MatrixXf, std::normal_distribution<float>> metropolis_hastings_sampler(
     [ ] (const Eigen::VectorXf state)
     {
       return normal_distribution_density(state[0], 500.0f, 1.0f, true);
