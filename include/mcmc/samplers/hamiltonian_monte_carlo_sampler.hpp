@@ -1,7 +1,7 @@
 #ifndef MCMC_HAMILTONIAN_MONTE_CARLO_SAMPLER_HPP_
 #define MCMC_HAMILTONIAN_MONTE_CARLO_SAMPLER_HPP_
 
-#include <algorithm>
+#include <cstdint>
 #include <functional>
 #include <math.h>
 #include <random>
@@ -52,12 +52,14 @@ public:
   hamiltonian_monte_carlo_sampler& operator=(const hamiltonian_monte_carlo_sampler&  that) = default;
   hamiltonian_monte_carlo_sampler& operator=(      hamiltonian_monte_carlo_sampler&& temp) = default;
 
-  state_type apply(const state_type& state, state_type* gradients)
+  void       setup(const state_type& state)
   {
-    state_type random_vector(state.size());
-    std::generate_n(&random_vector[0], random_vector.size(), proposal_rng_.function());
-
-    state_type momentum = precondition_matrix_ * random_vector;
+    potential_energy_ = -log_kernel_function_(state);
+  }
+  state_type apply(const state_type& state)
+  {
+    state_type random   = proposal_rng_.template generate<state_type>(state.size());
+    state_type momentum = precondition_matrix_ * random;
     kinetic_energy_     = momentum.dot(inverse_precondition_matrix_ * momentum) / 2.0;
     
     auto next_state = state;
@@ -70,7 +72,7 @@ public:
 
     const float potential_energy = -log_kernel_function_(next_state);
     const float kinetic_energy   = momentum.dot(inverse_precondition_matrix_ * momentum) / 2.0;
-
+    
     if (std::exp(std::min(0.0f, - potential_energy - kinetic_energy + potential_energy_ + kinetic_energy_)) < acceptance_rng_.generate())
       return state;
 
@@ -80,7 +82,7 @@ public:
   }
 
 protected:
-  std::function<float(const state_type&)>                        log_kernel_function_        ;
+  std::function<float     (const state_type&)>                   log_kernel_function_        ;
   std::function<state_type(const state_type&, state_type&)>      momentum_function_          ;
   precondition_matrix_type                                       precondition_matrix_        ;
   precondition_matrix_type                                       inverse_precondition_matrix_;
