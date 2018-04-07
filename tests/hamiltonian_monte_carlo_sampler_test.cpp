@@ -7,6 +7,7 @@
 
 #include <mcmc/samplers/hamiltonian_monte_carlo_sampler.hpp>
 #include <mcmc/markov_chain.hpp>
+#include <mcmc/random_number_generator.hpp>
 
 TEST_CASE("Hamiltonian Monte Carlo sampler is tested.", "[mcmc::hamiltonian_monte_carlo_sampler]")
 {

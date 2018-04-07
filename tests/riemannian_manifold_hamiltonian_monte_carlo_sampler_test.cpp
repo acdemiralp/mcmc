@@ -1,35 +1,45 @@
 #include "catch.hpp"
 
+#define _USE_MATH_DEFINES
+
+#include <math.h>
 #include <iostream>
 
-#include <mcmc/samplers/riemannian_manifold_hamiltonian_monte_carlo_sampler.hpp>
+#include <mcmc/samplers/differential_evolution_sampler.hpp>
 #include <mcmc/markov_chain.hpp>
-
-double normal_distribution_density(
-  double       x           , 
-  const double mu          = 0.0  , 
-  const double sigma       = 1.0  ,
-  const int    logarithmic = false)
-{
-  x = fabs((x - mu) / sigma);
-  return logarithmic ? -(0.918938533204672741780329736406 + 0.5 * x * x + log(sigma)) : 0.398942280401432677939946059934 * exp(-0.5 * x * x) / sigma;
-}
+#include <mcmc/random_number_generator.hpp>
+#include "mcmc/samplers/independent_metropolis_hastings_sampler.hpp"
+#include "mcmc/samplers/metropolis_adjusted_langevin_sampler.hpp"
+#include "mcmc/samplers/riemannian_manifold_hamiltonian_monte_carlo_sampler.hpp"
 
 TEST_CASE("Riemannian manifold Hamiltonian Monte Carlo sampler is tested.", "[mcmc::riemannian_manifold_hamiltonian_monte_carlo_sampler]")
 {
+  mcmc::random_number_generator<std::normal_distribution<float>> data_generator(250.0f, 0.1f);
+  const auto data = data_generator.generate<Eigen::VectorXf>(100);
+  
   Eigen::VectorXf initial_state(1);
-  initial_state[0] = 450.0f;
+  initial_state[0] = 1000.0f;
   
   Eigen::MatrixXf covariance_matrix(1, 1);
   covariance_matrix.setIdentity();
 
-  mcmc::riemannian_manifold_hamiltonian_monte_carlo_sampler<Eigen::VectorXf> sampler(
-    [ ] (const Eigen::VectorXf state)
+  auto log_likelihood_density = [ ] (const Eigen::VectorXf& state, const Eigen::VectorXf& data, const float sigma = 1.0f)
+  {
+    return -static_cast<float>(data.size()) * (0.5f * std::log(2.0f * M_PI) + std::log(sigma)) - ((data.array() - state[0]).pow(2) / (2.0f * std::pow(sigma, 2))).sum();
+  };
+  auto log_prior_density      = [ ] (const Eigen::VectorXf& state, const float mu = 0.0f, const float sigma = 1.0f)
+  {
+    return -0.5f * std::log(2.0f * M_PI) - std::log(sigma) - std::pow(state[0] - mu, 2) / (2.0f * std::pow(sigma, 2));
+  };
+
+  mcmc::riemannian_manifold_hamiltonian_monte_carlo_sampler<Eigen::VectorXf, Eigen::MatrixXf, std::normal_distribution<float>> sampler(
+    [=] (const Eigen::VectorXf& state)
     {
-      return normal_distribution_density(state[0], 500.0f, 1.0f, true);
+      return log_likelihood_density(state, data, 0.1f) + log_prior_density(state, 0.0f, 1.0f);
     },
     covariance_matrix, 
-    100.0f);
+    1.0f);
+  sampler.setup(initial_state);
 
   mcmc::markov_chain<Eigen::VectorXf> markov_chain(initial_state);
   for(auto i = 0; i < 10000; ++i)
@@ -38,5 +48,5 @@ TEST_CASE("Riemannian manifold Hamiltonian Monte Carlo sampler is tested.", "[mc
     std::cout << markov_chain.state().format(Eigen::IOFormat()) << "\n";
   }
 
-  REQUIRE(Approx(markov_chain.state()[0]).epsilon(1.0) == 500.0f);
+  REQUIRE(Approx(markov_chain.state()[0]).epsilon(0.1) == 250.0f);
 }

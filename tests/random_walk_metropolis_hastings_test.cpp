@@ -7,6 +7,7 @@
 
 #include <mcmc/samplers/random_walk_metropolis_hastings_sampler.hpp>
 #include <mcmc/markov_chain.hpp>
+#include <mcmc/random_number_generator.hpp>
 
 TEST_CASE("Random-walk Metropolis-Hastings sampler is tested.", "[mcmc::random_walk_metropolis_hastings_sampler]")
 {
