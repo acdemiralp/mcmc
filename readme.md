@@ -17,7 +17,7 @@ void main()
   mcmc::random_walk_metropolis_hastings_sampler<Eigen::VectorXf, Eigen::MatrixXf> sampler(
     [ ] (const Eigen::VectorXf& state)
     {
-      return normal_distribution_density(state[0], 500.0f, 1.0f, true);
+      return normal_distribution_density(500.0f, 1.0f, state[0]);
     },
     covariance_matrix, 
     100.0f);
@@ -51,7 +51,7 @@ The following list is based on https://m-clark.github.io/docs/ld_mcmc/index_onep
 - [ ] Delayed Rejection Metropolis
 - [x] Differential Evolution Markov Chain
 - [ ] Elliptical Slice Sampler
-- [x] Equi-Energy Sampler
+- [ ] Equi-Energy Sampler
 - [x] Gibbs Sampler
 - [ ] Griddy-Gibbs
 - [x] Hamiltonian Monte Carlo
@@ -67,7 +67,7 @@ The following list is based on https://m-clark.github.io/docs/ld_mcmc/index_onep
 - [ ] Oblique Hyperrectangle Slice Sampler
 - [ ] Preconditioned Crank-Nicolson
 - [ ] Random Dive Metropolis-Hastings
-- [ ] Random-Walk Metropolis
+- [x] Random-Walk Metropolis
 - [ ] Reflective Slice Sampler
 - [ ] Refractive Sampler
 - [ ] Reversible-Jump
@@ -83,6 +83,10 @@ The following list is based on https://m-clark.github.io/docs/ld_mcmc/index_onep
 - [ ] Univariate Eigenvector Slice Sampler
 - [ ] Updating Sequential Adaptive Metropolis-within-Gibbs
 - [ ] Updating Sequential Metropolis-within-Gibbs
+
+## Future Work ##
+- More samplers.
+- Quasi-random number generators (van der Corput-Halton sequence, Faure-Niederreiter sequence, Hammersley set, Poisson disk sampling, Sobol low-discrepancy sequence, ...).
 
 ## Acknowledgements ##
 The majority of the samplers in this library are inspired by Keith O'Hara's library with the same name: https://github.com/kthohr/mcmc
