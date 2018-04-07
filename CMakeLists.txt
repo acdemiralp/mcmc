@@ -54,8 +54,15 @@ if(BUILD_TESTS)
   enable_testing()
 
   set(PROJECT_TEST_SOURCES
+    tests/adaptive_equi_energy_sampler_test.cpp
+    tests/differential_evolution_sampler_test.cpp
+    tests/gibbs_sampler_test.cpp
+    tests/hamiltonian_monte_carlo_sampler_test.cpp
+    tests/independent_metropolis_hastings_sampler_test.cpp
     tests/markov_chain_test.cpp
-  	tests/sampler_test.cpp
+    tests/metropolis_adjusted_langevin_sampler_test.cpp
+    tests/random_walk_metropolis_hastings_test.cpp
+    tests/riemannian_manifold_hamiltonian_monte_carlo_sampler_test.cpp
   )
 
   foreach(_SOURCE ${PROJECT_TEST_SOURCES})
