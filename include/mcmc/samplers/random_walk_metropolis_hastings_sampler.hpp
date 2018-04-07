@@ -1,7 +1,6 @@
 #ifndef MCMC_RANDOM_WALK_METROPOLIS_HASTINGS_SAMPLER_HPP_
 #define MCMC_RANDOM_WALK_METROPOLIS_HASTINGS_SAMPLER_HPP_
 
-#include <algorithm>
 #include <functional>
 #include <math.h>
 #include <random>
@@ -40,17 +39,17 @@ public:
   random_walk_metropolis_hastings_sampler& operator=(const random_walk_metropolis_hastings_sampler&  that) = default;
   random_walk_metropolis_hastings_sampler& operator=(      random_walk_metropolis_hastings_sampler&& temp) = default;
 
+  void       setup (const state_type& state)
+  {
+    log_lebesque_density_ = log_kernel_function_(state);
+  }
   state_type apply (const state_type& state)
   {
-    state_type random_vector(state.size());
-    std::generate_n(&random_vector[0], random_vector.size(), proposal_rng_.function());
-
-    state_type next_state           = state + covariance_matrix_ * random_vector;
+    state_type random               = proposal_rng_.template generate<state_type>(state.size());
+    state_type next_state           = state + covariance_matrix_ * random;
     const auto log_lebesque_density = log_kernel_function_(next_state);
-
     if (std::exp(std::min(0.0f, log_lebesque_density - log_lebesque_density_)) < acceptance_rng_.generate()) 
       return state;
-    
     log_lebesque_density_ = log_lebesque_density;
     return next_state;
   }
