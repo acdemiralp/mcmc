@@ -5,7 +5,6 @@
 #include <math.h>
 #include <iostream>
 
-#include <mcmc/samplers/differential_evolution_sampler.hpp>
 #include <mcmc/markov_chain.hpp>
 #include <mcmc/random_number_generator.hpp>
 #include "mcmc/samplers/independent_metropolis_hastings_sampler.hpp"
@@ -35,8 +34,12 @@ TEST_CASE("Independent Metropolis-Hastings sampler is tested.", "[mcmc::independ
     {
       return log_likelihood_density(state, data, 0.1f) + log_prior_density(state, 0.0f, 1.0f);
     },
-    covariance_matrix, 
-    1.0f);
+    std::normal_distribution<float>(0.0f, 1.0f),
+    [ ] (const float x)
+    {
+      return -0.5f * std::log(2.0f * M_PI) - std::log(1.0f) - std::pow(x - 0.0f, 2) / (2.0f * std::pow(1.0f, 2));
+    },
+    covariance_matrix);
   sampler.setup(initial_state);
 
   mcmc::markov_chain<Eigen::VectorXf> markov_chain(initial_state);
