@@ -29,17 +29,17 @@ TEST_CASE("Metropolis-Hastings sampler is tested.", "[mcmc::metropolis_hastings_
     return -0.5f * std::log(2.0f * M_PI) - std::log(sigma) - std::pow(state[0] - mu, 2) / (2.0f * std::pow(sigma, 2));
   };
 
-  mcmc::metropolis_hastings_sampler<Eigen::VectorXf, Eigen::MatrixXf, std::normal_distribution<float>> sampler(
+  mcmc::metropolis_hastings_sampler<float, Eigen::VectorXf, Eigen::MatrixXf, std::normal_distribution<float>> sampler(
     [=] (const Eigen::VectorXf& state)
     {
       return log_likelihood_density(state, data, 0.1f) + log_prior_density(state, 0.0f, 1.0f);
     },
+    covariance_matrix,
     std::normal_distribution<float>(0.0f, 1.0f),
-    [ ] (const float x, const float mu)
+    [ ] (const Eigen::VectorXf& state, const Eigen::VectorXf& condition)
     {
-      return -0.5f * std::log(2.0f * M_PI) - std::log(1.0f) - std::pow(x - mu, 2) / (2.0f * std::pow(1.0f, 2));
-    },
-    covariance_matrix);
+      return -0.5f * std::log(2.0f * M_PI) - std::log(1.0f) - std::pow(state[0] - condition[0], 2) / (2.0f * std::pow(1.0f, 2));
+    });
   sampler.setup(initial_state);
 
   mcmc::markov_chain<Eigen::VectorXf> markov_chain(initial_state);

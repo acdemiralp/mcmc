@@ -29,13 +29,12 @@ TEST_CASE("Random-walk Metropolis-Hastings sampler is tested.", "[mcmc::random_w
     return -0.5f * std::log(2.0f * M_PI) - std::log(sigma) - std::pow(state[0] - mu, 2) / (2.0f * std::pow(sigma, 2));
   };
 
-  mcmc::random_walk_metropolis_hastings_sampler<Eigen::VectorXf, Eigen::MatrixXf, std::normal_distribution<float>> sampler(
+  mcmc::random_walk_metropolis_hastings_sampler<float, Eigen::VectorXf, Eigen::MatrixXf, std::normal_distribution<float>> sampler(
     [=] (const Eigen::VectorXf& state)
     {
       return log_likelihood_density(state, data, 0.1f) + log_prior_density(state, 0.0f, 1.0f);
     },
-    covariance_matrix, 
-    1.0f);
+    covariance_matrix);
   sampler.setup(initial_state);
 
   mcmc::markov_chain<Eigen::VectorXf> markov_chain(initial_state);

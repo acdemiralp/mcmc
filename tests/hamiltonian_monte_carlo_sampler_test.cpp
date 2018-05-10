@@ -21,20 +21,15 @@ TEST_CASE("Hamiltonian Monte Carlo sampler is tested.", "[mcmc::hamiltonian_mont
   Eigen::MatrixXf precondition_matrix(2, 2);
   precondition_matrix.setIdentity();
 
-  auto log_likelihood_density = [ ] (const Eigen::VectorXf& state, const Eigen::VectorXf& data, Eigen::VectorXf* gradients)
-  {
-    if(gradients)
-    {
-      (*gradients)[0] = (data.array() - state[0])       .sum() / std::pow(state[1], 2);
-      (*gradients)[1] = (data.array() - state[0]).pow(2).sum() / std::pow(state[1], 3) - static_cast<float>(data.size()) / state[1];
-    }
-    return -static_cast<float>(data.size()) * (0.5f * std::log(2.0f * M_PI) + std::log(state[1])) - ((data.array() - state[0]).pow(2) / (2.0f * std::pow(state[1], 2))).sum();
-  };
-
-  mcmc::hamiltonian_monte_carlo_sampler<Eigen::VectorXf, Eigen::MatrixXf, std::normal_distribution<float>> sampler(
+  mcmc::hamiltonian_monte_carlo_sampler<float, Eigen::VectorXf, Eigen::MatrixXf, std::normal_distribution<float>> sampler(
     [=] (const Eigen::VectorXf& state, Eigen::VectorXf* gradients)
     {
-      return log_likelihood_density(state, data, gradients);
+      if(gradients)
+      {
+        (*gradients)[0] = (data.array() - state[0])       .sum() / std::pow(state[1], 2);
+        (*gradients)[1] = (data.array() - state[0]).pow(2).sum() / std::pow(state[1], 3) - static_cast<float>(data.size()) / state[1];
+      }
+      return -static_cast<float>(data.size()) * (0.5f * std::log(2.0f * M_PI) + std::log(state[1])) - ((data.array() - state[0]).pow(2) / (2.0f * std::pow(state[1], 2))).sum();
     },
     precondition_matrix, 
     20,

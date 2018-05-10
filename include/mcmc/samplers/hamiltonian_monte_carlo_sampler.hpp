@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <functional>
 #include <math.h>
-#include <random>
 
 #include <external/Eigen/Dense>
 
@@ -13,37 +12,37 @@
 namespace mcmc
 {
 template<
+  typename density_type               = float,
   typename state_type                 = Eigen::VectorXf,
   typename precondition_matrix_type   = Eigen::MatrixXf,
-  typename proposal_distribution_type = std::normal_distribution<float>>
+  typename proposal_distribution_type = std::normal_distribution<density_type>>
 class hamiltonian_monte_carlo_sampler
 {
 public:
-  template<typename... arguments_type>
   explicit hamiltonian_monte_carlo_sampler(
-    const std::function<float(const state_type&, state_type*)>& kernel_function       ,
-    const precondition_matrix_type&                             precondition_matrix   ,
-    const std::uint32_t                                         leaps                 = 1,
-    const float                                                 step_size             = 1.0f,
-    const proposal_distribution_type&                           proposal_distribution = proposal_distribution_type())
+    const std::function<density_type(const state_type&, state_type*)>& log_target_density_function,
+    const precondition_matrix_type&                                    precondition_matrix        ,
+    const std::uint32_t                                                leaps                      = 1u,
+    const density_type                                                 step_size                  = density_type(1),
+    const proposal_distribution_type&                                  proposal_distribution      = proposal_distribution_type())
   : precondition_matrix_        (precondition_matrix.llt().matrixLLT())
   , inverse_precondition_matrix_(precondition_matrix.inverse())
   , leaps_                      (leaps)
   , step_size_                  (step_size)
   , proposal_rng_               (proposal_distribution)
-  , acceptance_rng_             (0.0f, 1.0f)
-  , potential_energy_           (0.0f)
-  , kinetic_energy_             (0.0f)
+  , acceptance_rng_             (0, 1)
+  , potential_energy_           (0)
+  , kinetic_energy_             (0)
   {
-    log_kernel_function_ = [=] (const state_type& state) -> float
+    log_target_density_function_ = [=] (const state_type& state) -> density_type
     {
-      return kernel_function(state, nullptr);
+      return log_target_density_function(state, nullptr);
     };
-    momentum_function_   = [=] (const state_type& state, state_type& momentum) -> state_type
+    log_momentum_function_       = [=] (const state_type& state, state_type& momentum) -> state_type
     {
       state_type gradients(state.size());
-      kernel_function(state, &gradients);
-      return momentum + step_size_ * gradients / 2.0;
+      log_target_density_function(state, &gradients);
+      return momentum + step_size_ * gradients / density_type(2);
     };
   }
   hamiltonian_monte_carlo_sampler           (const hamiltonian_monte_carlo_sampler&  that) = default;
@@ -54,26 +53,26 @@ public:
 
   void       setup(const state_type& state)
   {
-    potential_energy_ = -log_kernel_function_(state);
+    potential_energy_ = -log_target_density_function_(state);
   }
   state_type apply(const state_type& state)
   {
     state_type random   = proposal_rng_.template generate<state_type>(state.size());
     state_type momentum = precondition_matrix_ * random;
-    kinetic_energy_     = momentum.dot(inverse_precondition_matrix_ * momentum) / 2.0;
+    kinetic_energy_     = momentum.dot(inverse_precondition_matrix_ * momentum) / density_type(2);
     
     auto next_state = state;
-    for(auto i = 0; i < leaps_; ++i)
+    for(auto i = 0u; i < leaps_; ++i)
     {
-      momentum    = momentum_function_(next_state, momentum);
+      momentum    = log_momentum_function_(next_state, momentum);
       next_state += step_size_ * inverse_precondition_matrix_ * momentum;
-      momentum    = momentum_function_(next_state, momentum);
+      momentum    = log_momentum_function_(next_state, momentum);
     }
 
-    const float potential_energy = -log_kernel_function_(next_state);
-    const float kinetic_energy   = momentum.dot(inverse_precondition_matrix_ * momentum) / 2.0;
+    const density_type potential_energy = -log_target_density_function_(next_state);
+    const density_type kinetic_energy   = momentum.dot(inverse_precondition_matrix_ * momentum) / density_type(2);
     
-    if (std::exp(std::min(0.0f, - potential_energy - kinetic_energy + potential_energy_ + kinetic_energy_)) < acceptance_rng_.generate())
+    if (std::exp(std::min(density_type(0), - potential_energy - kinetic_energy + potential_energy_ + kinetic_energy_)) < acceptance_rng_.generate())
       return state;
 
     potential_energy_ = potential_energy;
@@ -82,16 +81,16 @@ public:
   }
 
 protected:
-  std::function<float     (const state_type&)>                   log_kernel_function_        ;
-  std::function<state_type(const state_type&, state_type&)>      momentum_function_          ;
-  precondition_matrix_type                                       precondition_matrix_        ;
-  precondition_matrix_type                                       inverse_precondition_matrix_;
-  std::uint32_t                                                  leaps_                      ;
-  float                                                          step_size_                  ;
-  random_number_generator<proposal_distribution_type>            proposal_rng_               ;
-  random_number_generator<std::uniform_real_distribution<float>> acceptance_rng_             ;
-  float                                                          potential_energy_           ;
-  float                                                          kinetic_energy_             ;
+  std::function<density_type(const state_type&)>                        log_target_density_function_;
+  std::function<state_type  (const state_type&, state_type&)>           log_momentum_function_      ;
+  precondition_matrix_type                                              precondition_matrix_        ;
+  precondition_matrix_type                                              inverse_precondition_matrix_;
+  std::uint32_t                                                         leaps_                      ;
+  density_type                                                          step_size_                  ;
+  random_number_generator<proposal_distribution_type>                   proposal_rng_               ;
+  random_number_generator<std::uniform_real_distribution<density_type>> acceptance_rng_             ;
+  density_type                                                          potential_energy_           ;
+  density_type                                                          kinetic_energy_             ;
 };
 }
 
