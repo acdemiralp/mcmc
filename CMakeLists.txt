@@ -21,6 +21,7 @@ set(PROJECT_SOURCES
   include/mcmc/samplers/hamiltonian_monte_carlo_sampler.hpp
   include/mcmc/samplers/independent_metropolis_hastings_sampler.hpp
   include/mcmc/samplers/metropolis_adjusted_langevin_sampler.hpp
+  include/mcmc/samplers/metropolis_hastings_sampler.hpp
   include/mcmc/samplers/random_walk_metropolis_hastings_sampler.hpp
   include/mcmc/samplers/riemannian_manifold_hamiltonian_monte_carlo_sampler.hpp
   include/mcmc/markov_chain.hpp
@@ -61,6 +62,7 @@ if(BUILD_TESTS)
     tests/independent_metropolis_hastings_sampler_test.cpp
     tests/markov_chain_test.cpp
     tests/metropolis_adjusted_langevin_sampler_test.cpp
+    tests/metropolis_hastings_sampler_test.cpp
     tests/random_walk_metropolis_hastings_sampler_test.cpp
     tests/riemannian_manifold_hamiltonian_monte_carlo_sampler_test.cpp
   )
