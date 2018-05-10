@@ -11,39 +11,32 @@
 
 TEST_CASE("Gibbs sampler is tested.", "[mcmc::gibbs_sampler]")
 {
-  mcmc::random_number_generator<std::normal_distribution<float>> data_generator(250.0f, 0.1f);
-  const auto data = data_generator.generate<Eigen::VectorXf>(100);
-  
-  Eigen::VectorXf initial_state(1);
-  initial_state[0] = 1000.0f;
-  
-  Eigen::MatrixXf covariance_matrix(1, 1);
-  covariance_matrix.setIdentity();
+  // Three unit vectors parametrized as (theta, phi). Assume they are placed horizontally: v1 v2 v3.
+  Eigen::VectorXcf data(3);
+  data[0] = {30.0f, 60.0f}; 
+  data[1] = {15.0f, 45.0f};
+  data[2] = {45.0f, 90.0f};
 
-  auto log_likelihood_density = [ ] (const Eigen::VectorXf& state, const Eigen::VectorXf& data, const float sigma = 1.0f)
-  {
-    return -static_cast<float>(data.size()) * (0.5f * std::log(2.0f * M_PI) + std::log(sigma)) - ((data.array() - state[0]).pow(2) / (2.0f * std::pow(sigma, 2))).sum();
-  };
-  auto log_prior_density      = [ ] (const Eigen::VectorXf& state, const float mu = 0.0f, const float sigma = 1.0f)
-  {
-    return -0.5f * std::log(2.0f * M_PI) - std::log(sigma) - std::pow(state[0] - mu, 2) / (2.0f * std::pow(sigma, 2));
-  };
-
-  mcmc::gibbs_sampler<Eigen::VectorXf, Eigen::MatrixXf, std::normal_distribution<float>> sampler(
-    [=] (const Eigen::VectorXf& state)
+  mcmc::gibbs_sampler<std::complex<float>, Eigen::VectorXcf, std::normal_distribution<float>> sampler(
+    [=] (const Eigen::VectorXcf& state, std::size_t index)
     {
-      return log_likelihood_density(state, data, 0.1f) + log_prior_density(state, 0.0f, 1.0f);
-    },
-    covariance_matrix, 
-    1.0f);
-  sampler.setup(initial_state);
+      // TODO: Draw a sample from the conditional distribution (state[index] | state[!index]...).
+      // The problem: Create a connected line segment from the three vectors without significantly deviating from the original data.
+      // Model the conditional distribution in a way that is both dependent on the distance of the vector from the original data as well as its suitability to the current state of neighbours.
+      // Note that v1 and v3 are dependent on v2 and v2 is dependent on v1 and v3 due to their horizontal placement (assuming a maximum neighbour distance of one).
+      return std::complex<float>{0.0f, 0.0f};
+    });
 
-  mcmc::markov_chain<Eigen::VectorXf> markov_chain(initial_state);
+  mcmc::markov_chain<Eigen::VectorXcf> markov_chain(data);
   for(auto i = 0; i < 10000; ++i)
   {
     markov_chain.update(sampler);
     std::cout << markov_chain.state().format(Eigen::IOFormat()) << "\n";
   }
 
-  REQUIRE(Approx(markov_chain.state()[0]).epsilon(0.1) == 250.0f);
+  for (auto i = 0; i < markov_chain.state().size(); ++i)
+  {
+    REQUIRE(Approx(markov_chain.state()[i].real()).epsilon(1.0) == 0.0f);
+    REQUIRE(Approx(markov_chain.state()[i].imag()).epsilon(1.0) == 0.0f);
+  }
 }
