@@ -61,7 +61,7 @@ if(BUILD_TESTS)
     tests/independent_metropolis_hastings_sampler_test.cpp
     tests/markov_chain_test.cpp
     tests/metropolis_adjusted_langevin_sampler_test.cpp
-    tests/random_walk_metropolis_hastings_test.cpp
+    tests/random_walk_metropolis_hastings_sampler_test.cpp
     tests/riemannian_manifold_hamiltonian_monte_carlo_sampler_test.cpp
   )
 
