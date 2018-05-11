@@ -37,17 +37,24 @@ include(import_library)
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE 
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/external>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-  $<INSTALL_INTERFACE:include>)
+  $<INSTALL_INTERFACE:include>
+  $<INSTALL_INTERFACE:include/external>)
 target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_INCLUDE_DIRS})
 target_link_libraries     (${PROJECT_NAME} INTERFACE ${PROJECT_LIBRARIES})
+target_compile_options    (${PROJECT_NAME} INTERFACE -DNOMINMAX)
 
 # Hack for header-only project to appear in the IDEs.
 add_library(${PROJECT_NAME}_ STATIC ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME}_ 
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR})     
+  PUBLIC 
+  ${CMAKE_CURRENT_SOURCE_DIR}/include 
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/external 
+  ${CMAKE_CURRENT_BINARY_DIR})     
 target_include_directories(${PROJECT_NAME}_ PUBLIC ${PROJECT_INCLUDE_DIRS})
 target_link_libraries     (${PROJECT_NAME}_ PUBLIC ${PROJECT_LIBRARIES})
+target_compile_options    (${PROJECT_NAME}_ PUBLIC -DNOMINMAX)
 set_target_properties     (${PROJECT_NAME}_ PROPERTIES LINKER_LANGUAGE CXX)
 
 ##################################################    Testing     ##################################################
@@ -72,6 +79,7 @@ if(BUILD_TESTS)
     set                   (_SOURCES tests/catch.hpp tests/main.cpp ${_SOURCE})
     add_executable        (${_NAME} ${_SOURCES})
     target_link_libraries (${_NAME} ${PROJECT_NAME})
+    target_compile_options(${_NAME} PUBLIC -DNOMINMAX)
     add_test              (${_NAME} ${_NAME})
     set_property          (TARGET ${_NAME} PROPERTY FOLDER "Tests")
     source_group          ("source" FILES ${_SOURCES})
