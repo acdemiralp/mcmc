@@ -5,11 +5,9 @@
 #include <math.h>
 #include <iostream>
 
-#include <mcmc/samplers/differential_evolution_sampler.hpp>
+#include <mcmc/samplers/metropolis_adjusted_langevin_sampler.hpp>
 #include <mcmc/markov_chain.hpp>
 #include <mcmc/random_number_generator.hpp>
-#include "mcmc/samplers/independent_metropolis_hastings_sampler.hpp"
-#include "mcmc/samplers/metropolis_adjusted_langevin_sampler.hpp"
 
 TEST_CASE("Metropolis adjusted Langevin sampler is tested.", "[mcmc::metropolis_adjusted_langevin_sampler]")
 {

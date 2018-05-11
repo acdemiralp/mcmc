@@ -22,12 +22,12 @@ public:
   explicit hamiltonian_monte_carlo_sampler(
     const std::function<density_type(const state_type&, state_type*)>& log_target_density_function,
     const precondition_matrix_type&                                    precondition_matrix        ,
-    const std::uint32_t                                                leaps                      = 1u,
+    const std::uint32_t                                                leap_steps                      = 1u,
     const density_type                                                 step_size                  = density_type(1),
     const proposal_distribution_type&                                  proposal_distribution      = proposal_distribution_type())
   : precondition_matrix_        (precondition_matrix.llt().matrixLLT())
   , inverse_precondition_matrix_(precondition_matrix.inverse())
-  , leaps_                      (leaps)
+  , leap_steps_                 (leap_steps)
   , step_size_                  (step_size)
   , proposal_rng_               (proposal_distribution)
   , acceptance_rng_             (0, 1)
@@ -62,7 +62,7 @@ public:
     kinetic_energy_     = momentum.dot(inverse_precondition_matrix_ * momentum) / density_type(2);
     
     auto next_state = state;
-    for(auto i = 0u; i < leaps_; ++i)
+    for(auto i = 0u; i < leap_steps_; ++i)
     {
       momentum    = log_momentum_function_(next_state, momentum);
       next_state += step_size_ * inverse_precondition_matrix_ * momentum;
@@ -85,7 +85,7 @@ protected:
   std::function<state_type  (const state_type&, state_type&)>           log_momentum_function_      ;
   precondition_matrix_type                                              precondition_matrix_        ;
   precondition_matrix_type                                              inverse_precondition_matrix_;
-  std::uint32_t                                                         leaps_                      ;
+  std::uint32_t                                                         leap_steps_                 ;
   density_type                                                          step_size_                  ;
   random_number_generator<proposal_distribution_type>                   proposal_rng_               ;
   random_number_generator<std::uniform_real_distribution<density_type>> acceptance_rng_             ;
