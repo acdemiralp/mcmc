@@ -83,8 +83,8 @@ static void run(Index rows, Index cols, Index depth,
   if(info)
   {
     // this is the parallel version!
-    int tid = omp_get_thread_num();
-    int threads = omp_get_num_threads();
+    Index tid = omp_get_thread_num();
+    Index threads = omp_get_num_threads();
 
     LhsScalar* blockA = blocking.blockA();
     eigen_internal_assert(blockA!=0);
@@ -116,9 +116,9 @@ static void run(Index rows, Index cols, Index depth,
       info[tid].sync = k;
 
       // Computes C_i += A' * B' per A'_i
-      for(int shift=0; shift<threads; ++shift)
+      for(Index shift=0; shift<threads; ++shift)
       {
-        int i = (tid+shift)%threads;
+        Index i = (tid+shift)%threads;
 
         // At this point we have to make sure that A'_i has been updated by the thread i,
         // we use testAndSetOrdered to mimic a volatile access.

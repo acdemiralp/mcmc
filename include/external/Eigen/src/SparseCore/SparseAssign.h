@@ -143,7 +143,10 @@ struct Assignment<DstXprType, SrcXprType, Functor, Sparse2Dense>
       dst.setZero();
     
     internal::evaluator<SrcXprType> srcEval(src);
-    resize_if_allowed(dst, src, func);
+    Index dstRows = src.rows();
+    Index dstCols = src.cols();
+    if((dst.rows()!=dstRows) || (dst.cols()!=dstCols))
+      dst.resize(dstRows, dstCols);
     internal::evaluator<DstXprType> dstEval(dst);
     
     const Index outerEvaluationSize = (internal::evaluator<SrcXprType>::Flags&RowMajorBit) ? src.rows() : src.cols();

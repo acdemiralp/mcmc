@@ -75,7 +75,7 @@ template<typename Index> struct GemmParallelInfo
 {
   GemmParallelInfo() : sync(-1), users(0), lhs_start(0), lhs_length(0) {}
 
-  Index volatile sync;
+  int volatile sync;
   int volatile users;
 
   Index lhs_start;
@@ -104,14 +104,13 @@ void parallelize_gemm(const Functor& func, Index rows, Index cols, Index depth, 
   // - the sizes are large enough
 
   // compute the maximal number of threads from the size of the product:
-  // This first heuristic takes into account that the product kernel is fully optimized when working with nr columns at once.
+  // FIXME this has to be fine tuned
   Index size = transpose ? rows : cols;
-  Index pb_max_threads = std::max<Index>(1,size / Functor::Traits::nr);
-
+  Index pb_max_threads = std::max<Index>(1,size / 32);
   // compute the maximal number of threads from the total amount of work:
   double work = static_cast<double>(rows) * static_cast<double>(cols) *
       static_cast<double>(depth);
-  double kMinTaskSize = 50000;  // FIXME improve this heuristic.
+  double kMinTaskSize = 50000;  // Heuristic.
   pb_max_threads = std::max<Index>(1, std::min<Index>(pb_max_threads, work / kMinTaskSize));
 
   // compute the number of threads we are going to use

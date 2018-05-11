@@ -296,7 +296,7 @@ template<typename Derived> class DenseBase
     EIGEN_DEVICE_FUNC
     Derived& operator=(const ReturnByValue<OtherDerived>& func);
 
-    /** \internal
+    /** \ínternal
       * Copies \a other into *this without evaluating other. \returns a reference to *this.
       * \deprecated */
     template<typename OtherDerived>
@@ -463,17 +463,7 @@ template<typename Derived> class DenseBase
     EIGEN_DEVICE_FUNC
     void visit(Visitor& func) const;
 
-    /** \returns a WithFormat proxy object allowing to print a matrix the with given
-      * format \a fmt.
-      *
-      * See class IOFormat for some examples.
-      *
-      * \sa class IOFormat, class WithFormat
-      */
-    inline const WithFormat<Derived> format(const IOFormat& fmt) const
-    {
-      return WithFormat<Derived>(derived(), fmt);
-    }
+    inline const WithFormat<Derived> format(const IOFormat& fmt) const;
 
     /** \returns the unique coefficient of a 1x1 expression */
     EIGEN_DEVICE_FUNC
@@ -484,9 +474,9 @@ template<typename Derived> class DenseBase
       return derived().coeff(0,0);
     }
 
-    EIGEN_DEVICE_FUNC bool all() const;
-    EIGEN_DEVICE_FUNC bool any() const;
-    EIGEN_DEVICE_FUNC Index count() const;
+    bool all() const;
+    bool any() const;
+    Index count() const;
 
     typedef VectorwiseOp<Derived, Horizontal> RowwiseReturnType;
     typedef const VectorwiseOp<const Derived, Horizontal> ConstRowwiseReturnType;

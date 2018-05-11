@@ -41,7 +41,7 @@ template<> struct check_rows_cols_for_overflow<Dynamic> {
   {
     // http://hg.mozilla.org/mozilla-central/file/6c8a909977d3/xpcom/ds/CheckedInt.h#l242
     // we assume Index is signed
-    Index max_index = (std::size_t(1) << (8 * sizeof(Index) - 1)) - 1; // assume Index is signed
+    Index max_index = (size_t(1) << (8 * sizeof(Index) - 1)) - 1; // assume Index is signed
     bool error = (rows == 0 || cols == 0) ? false
                : (rows > max_index / cols);
     if (error)
@@ -812,13 +812,6 @@ class PlainObjectBase : public internal::dense_xpr_base<Derived>::type
       this->_set_noalias(other);
     }
 
-    // Initialize an arbitrary matrix from an object convertible to the Derived type.
-    template<typename T>
-    EIGEN_DEVICE_FUNC
-    EIGEN_STRONG_INLINE void _init1(const Derived& other){
-      this->_set_noalias(other);
-    }
-
     // Initialize an arbitrary matrix from a generic Eigen expression
     template<typename T, typename OtherDerived>
     EIGEN_DEVICE_FUNC
@@ -841,7 +834,7 @@ class PlainObjectBase : public internal::dense_xpr_base<Derived>::type
       this->derived() = r;
     }
     
-    // For fixed-size Array<Scalar,...>
+    // For fixed -size arrays:
     template<typename T>
     EIGEN_DEVICE_FUNC
     EIGEN_STRONG_INLINE void _init1(const Scalar& val0,
@@ -853,7 +846,6 @@ class PlainObjectBase : public internal::dense_xpr_base<Derived>::type
       Base::setConstant(val0);
     }
     
-    // For fixed-size Array<Index,...>
     template<typename T>
     EIGEN_DEVICE_FUNC
     EIGEN_STRONG_INLINE void _init1(const Index& val0,
