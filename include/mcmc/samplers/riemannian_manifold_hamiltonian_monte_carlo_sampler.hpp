@@ -1,12 +1,13 @@
 #ifndef MCMC_RIEMANNIAN_MANIFOLD_HAMILTONIAN_MONTE_CARLO_SAMPLER_HPP_
 #define MCMC_RIEMANNIAN_MANIFOLD_HAMILTONIAN_MONTE_CARLO_SAMPLER_HPP_
 
+#define _USE_MATH_DEFINES
+
+#include <cmath>
 #include <functional>
-#include <math.h>
 #include <random>
 
-#include <external/Eigen/Cholesky>
-#include <external/Eigen/Core>
+#include <external/Eigen/Dense>
 #include <external/unsupported/Eigen/CXX11/Tensor>
 
 #include <mcmc/random_number_generator.hpp>
@@ -46,14 +47,14 @@ public:
     {
       state_type gradients(state.size());
       log_target_density_function(state, &gradients);
-      for (std::size_t i = 0; i < gradients.size(); ++i) 
+      for (auto i = 0; i < gradients.size(); ++i) 
       {
         auto dimensions    = tensor_derivative.dimensions();
         auto sliced_tensor = tensor_derivative.slice(
-          std::array<std::size_t, 3>{std::size_t(0),             std::size_t(0),             i}, 
+          std::array<std::size_t, 3>{std::size_t(0),             std::size_t(0),             std::size_t(i)}, 
           std::array<std::size_t, 3>{std::size_t(dimensions[0]), std::size_t(dimensions[1]), std::size_t(1)});
 
-        Eigen::MatrixXf temp = inverse_tensor_matrix * tensor_to_matrix<3>(sliced_tensor, dimensions[0], dimensions[1]);
+        Eigen::MatrixXf temp = inverse_tensor_matrix * tensor_to_matrix(sliced_tensor.expression(), dimensions[0], dimensions[1]);
         gradients[i]         = -gradients[i] + density_type(0.5) * (temp.trace() - (momentum.transpose() * temp * inverse_tensor_matrix * momentum));
       }
       return momentum + step_size_ * gradients / density_type(2);
@@ -67,14 +68,18 @@ public:
   
   void       setup(const state_type& state)
   {
-    //potential_energy_ = -log_target_density_function_(state);
+    tensor_matrix_         = tensor_function_(state, &tensor_);
+    inverse_tensor_matrix_ = tensor_matrix_.inverse();
+    constant_term_         = density_type(0.5) * state.size() * std::log(2.0 * M_PI);
+    potential_energy_      = constant_term_ - log_target_density_function_(state) + std::log(tensor_matrix_.determinant());
   }
   state_type apply(const state_type& state)
   {
-    //state_type random   = proposal_rng_.template generate<state_type>(state.size());
-    //state_type momentum = precondition_matrix_ * random;
-    //kinetic_energy_     = momentum.dot(inverse_precondition_matrix_ * momentum) / density_type(2);
-    //
+    auto tensor     = tensor_;
+    auto random     = proposal_rng_.template generate<state_type>(state.size());
+    auto momentum   = tensor_matrix_.cholesky() * random;
+    kinetic_energy_ = momentum.dot(inverse_tensor_matrix_ * momentum) / density_type(2);
+
     //auto next_state = state;
     //for(auto i = 0u; i < leaps_; ++i)
     //{
@@ -95,15 +100,15 @@ public:
   }
 
 protected:
-  template<std::size_t rank>
+  template <std::size_t rank>
   static auto tensor_to_matrix(const Eigen::Tensor<density_type, rank>& tensor, const std::size_t rows, const std::size_t columns)
   {
     return Eigen::Map<const Eigen::Matrix<density_type, Eigen::Dynamic, Eigen::Dynamic>>(tensor.data(), rows, columns);
   }
-  template<typename... dimension_types>
+  template <typename... dimension_types>
   static auto matrix_to_tensor(const Eigen::Matrix<density_type, Eigen::Dynamic, Eigen::Dynamic>& matrix, dimension_types... dimensions)
   {
-    return Eigen::TensorMap<Eigen::Tensor<const density_type, sizeof...(dimension_types)>>(matrix.data(), {dimensions...});
+    return Eigen::TensorMap<Eigen::Tensor<const density_type, sizeof... (dimension_types)>>(matrix.data(), {dimensions...});
   }
 
   std::function<density_type(const state_type&)>                                                            log_target_density_function_;
@@ -116,6 +121,10 @@ protected:
   random_number_generator<std::uniform_real_distribution<density_type>>                                     acceptance_rng_             ;
   density_type                                                                                              potential_energy_           ;
   density_type                                                                                              kinetic_energy_             ;
+  tensor_type                                                                                               tensor_                     ;
+  matrix_type                                                                                               tensor_matrix_              ;
+  matrix_type                                                                                               inverse_tensor_matrix_      ;
+  density_type                                                                                              constant_term_              ;
 };
 }
 
