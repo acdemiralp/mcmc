@@ -28,25 +28,25 @@ TEST_CASE("Riemannian manifold Hamiltonian Monte Carlo sampler is tested.", "[mc
       }
       return -static_cast<float>(data.size()) * (0.5f * std::log(2.0f * M_PI) + std::log(state[1])) - ((data.array() - state[0]).pow(2) / (2.0f * std::pow(state[1], 2))).sum();
     },
-    [ ] (const Eigen::VectorXf& state, Eigen::Tensor<float, 3>* tensor)
+    [&] (const Eigen::VectorXf& state, Eigen::Tensor<float, 3>* tensor)
     {
+      auto value = static_cast<float>(data.size()) / std::pow(state[1], 2);
       Eigen::MatrixXf matrix(2, 2);
-      matrix(0, 0) =        static_cast<float>(state.size()) / std::pow(state[1], 2);
-      matrix(1, 1) = 2.0f * static_cast<float>(state.size()) / std::pow(state[1], 2);
+      matrix(0, 0) =        value;
+      matrix(1, 1) = 2.0f * value;
       if(tensor)
       {
-        tensor->resize (2, 2, 2);
-        tensor->setZero();
-        // TODO.
-        // auto dimensions    = tensor->dimensions();
-        // auto sliced_tensor = tensor->slice(
-        //   std::array<std::size_t, 3>{std::size_t(0),             std::size_t(0),             std::size_t(1)}, 
-        //   std::array<std::size_t, 3>{std::size_t(dimensions[0]), std::size_t(dimensions[1]), std::size_t(1)});
-        // sliced_tensor = -2.0f * matrix / state[1]; 
+        auto coefficients = -2.0f * matrix / state[1];
+        tensor->resize  (2, 2, 2);
+        tensor->setZero ();
+        tensor->coeffRef(0, 0, 1) = coefficients(0, 0);
+        tensor->coeffRef(0, 1, 1) = coefficients(0, 1);
+        tensor->coeffRef(1, 0, 1) = coefficients(1, 0);
+        tensor->coeffRef(1, 1, 1) = coefficients(1, 1);
       }
       return matrix;
     },
-    20,
+    2,
     5,
     0.1f);
   sampler.setup(initial_state);
