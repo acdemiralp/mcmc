@@ -30,7 +30,21 @@ TEST_CASE("Riemannian manifold Hamiltonian Monte Carlo sampler is tested.", "[mc
     },
     [ ] (const Eigen::VectorXf& state, Eigen::Tensor<float, 3>* tensor)
     {
-      return Eigen::MatrixXf();
+      Eigen::MatrixXf matrix(2, 2);
+      matrix(0, 0) =        static_cast<float>(state.size()) / std::pow(state[1], 2);
+      matrix(1, 1) = 2.0f * static_cast<float>(state.size()) / std::pow(state[1], 2);
+      if(tensor)
+      {
+        tensor->resize (2, 2, 2);
+        tensor->setZero();
+        // TODO.
+        // auto dimensions    = tensor->dimensions();
+        // auto sliced_tensor = tensor->slice(
+        //   std::array<std::size_t, 3>{std::size_t(0),             std::size_t(0),             std::size_t(1)}, 
+        //   std::array<std::size_t, 3>{std::size_t(dimensions[0]), std::size_t(dimensions[1]), std::size_t(1)});
+        // sliced_tensor = -2.0f * matrix / state[1]; 
+      }
+      return matrix;
     },
     20,
     5,
