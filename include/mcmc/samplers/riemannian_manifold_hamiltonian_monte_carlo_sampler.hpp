@@ -30,14 +30,15 @@ public:
     const std::uint32_t                                                 fixed_point_steps          = 5u,
     const density_type                                                  step_size                  = density_type(1),
     const proposal_distribution_type&                                   proposal_distribution      = proposal_distribution_type())
-  : tensor_function_  (tensor_function)
-  , leap_steps_       (leap_steps)
-  , fixed_point_steps_(fixed_point_steps)
-  , step_size_        (step_size)
-  , proposal_rng_     (proposal_distribution)
-  , acceptance_rng_   (0, 1)
-  , potential_energy_ (0)
-  , kinetic_energy_   (0)
+  : tensor_function_      (tensor_function)
+  , leap_steps_           (leap_steps)
+  , fixed_point_steps_    (fixed_point_steps)
+  , step_size_            (step_size)
+  , proposal_rng_         (proposal_distribution)
+  , acceptance_rng_       (0, 1)
+  , constant_term_        (0)
+  , potential_energy_     (0)
+  , kinetic_energy_       (0)
   {
     log_target_density_function_ = [=] (const state_type& state) -> density_type
     {
@@ -68,35 +69,59 @@ public:
   
   void       setup(const state_type& state)
   {
-    tensor_matrix_         = tensor_function_(state, &tensor_);
-    inverse_tensor_matrix_ = tensor_matrix_.inverse();
-    constant_term_         = density_type(0.5) * state.size() * std::log(2.0 * M_PI);
-    potential_energy_      = constant_term_ - log_target_density_function_(state) + std::log(tensor_matrix_.determinant());
+    constant_term_                  = density_type(0.5) * state.size() * std::log(2.0 * M_PI);
+
+    tensor_                         = tensor_type();
+    tensor_matrix_                  = tensor_function_(state, &tensor_);
+    inverse_tensor_matrix_          = tensor_matrix_.inverse();
+    
+    previous_tensor_                = tensor_;
+    previous_tensor_matrix_         = tensor_matrix_;
+    previous_inverse_tensor_matrix_ = inverse_tensor_matrix_;
+    
+    potential_energy_               = constant_term_ - log_target_density_function_(state) + std::log(tensor_matrix_.determinant());
   }
   state_type apply(const state_type& state)
   {
-    auto tensor     = tensor_;
-    auto random     = proposal_rng_.template generate<state_type>(state.size());
-    auto momentum   = tensor_matrix_.cholesky() * random;
-    kinetic_energy_ = momentum.dot(inverse_tensor_matrix_ * momentum) / density_type(2);
+    state_type random   = proposal_rng_.template generate<state_type>(state.size());
+    state_type momentum = previous_tensor_matrix_.llt().matrixLLT() * random;
+    kinetic_energy_     = momentum.dot(previous_inverse_tensor_matrix_ * momentum) / density_type(2);
+    
+    state_type next_state = state;
+    for (auto i = 0u; i < leap_steps_; ++i)
+    {
+      auto temp_momentum = momentum;
+      for (auto j = 0u; j < fixed_point_steps_; ++j)
+        temp_momentum = momentum + log_momentum_function_(next_state, temp_momentum, previous_tensor_, previous_inverse_tensor_matrix_);
+      momentum = temp_momentum;
 
-    //auto next_state = state;
-    //for(auto i = 0u; i < leaps_; ++i)
-    //{
-    //  momentum    = log_momentum_function_(next_state, momentum);
-    //  next_state += step_size_ * inverse_precondition_matrix_ * momentum;
-    //  momentum    = log_momentum_function_(next_state, momentum);
-    //}
-    //
-    //const density_type potential_energy = -log_target_density_function_(next_state);
-    //const density_type kinetic_energy   = momentum.dot(inverse_precondition_matrix_ * momentum) / density_type(2);
-    //
-    //if (std::exp(std::min(density_type(0), - potential_energy - kinetic_energy + potential_energy_ + kinetic_energy_)) < acceptance_rng_.generate())
-    //  return state;
-    //
-    //potential_energy_ = potential_energy;
-    //kinetic_energy_   = kinetic_energy  ;
-    return state;
+      auto temp_state = next_state;
+      for (auto j = 0u; j < fixed_point_steps_; ++j)
+      {
+        inverse_tensor_matrix_ = tensor_function_(temp_state, nullptr).inverse();
+        temp_state             = next_state + density_type(0.5) * step_size_ * (previous_inverse_tensor_matrix_ + inverse_tensor_matrix_) * momentum;
+      }
+      next_state = temp_state;
+
+      tensor_matrix_         = tensor_function_(next_state, &tensor_);
+      inverse_tensor_matrix_ = tensor_matrix_.inverse();
+
+      momentum += log_momentum_function_(next_state, momentum, tensor_, inverse_tensor_matrix_);
+    }
+
+    const density_type potential_energy = constant_term_ - log_target_density_function_(next_state) + density_type(0.5) * std::log(tensor_matrix_.determinant());
+    const density_type kinetic_energy   = momentum.dot(inverse_tensor_matrix_ * momentum) / density_type(2);
+
+    if (std::exp(std::min(density_type(0), - potential_energy - kinetic_energy + potential_energy_ + kinetic_energy_)) < acceptance_rng_.generate())
+      return state;
+
+    potential_energy_               = potential_energy      ;
+    kinetic_energy_                 = kinetic_energy        ;
+    previous_tensor_                = tensor_               ;
+    previous_tensor_matrix_         = tensor_matrix_        ;
+    previous_inverse_tensor_matrix_ = inverse_tensor_matrix_;
+
+    return next_state;
   }
 
 protected:
@@ -111,20 +136,28 @@ protected:
     return Eigen::TensorMap<Eigen::Tensor<const density_type, sizeof... (dimension_types)>>(matrix.data(), {dimensions...});
   }
 
-  std::function<density_type(const state_type&)>                                                            log_target_density_function_;
-  std::function<state_type  (const state_type&, const state_type&, const tensor_type&, const matrix_type&)> log_momentum_function_      ;
-  std::function<matrix_type (const state_type&, tensor_type*)>                                              tensor_function_            ;
-  std::uint32_t                                                                                             leap_steps_                 ;
-  std::uint32_t                                                                                             fixed_point_steps_          ;
-  density_type                                                                                              step_size_                  ;
-  random_number_generator<proposal_distribution_type>                                                       proposal_rng_               ;
-  random_number_generator<std::uniform_real_distribution<density_type>>                                     acceptance_rng_             ;
-  density_type                                                                                              potential_energy_           ;
-  density_type                                                                                              kinetic_energy_             ;
-  tensor_type                                                                                               tensor_                     ;
-  matrix_type                                                                                               tensor_matrix_              ;
-  matrix_type                                                                                               inverse_tensor_matrix_      ;
-  density_type                                                                                              constant_term_              ;
+  std::function<density_type(const state_type&)>                                                            log_target_density_function_   ;
+  std::function<state_type  (const state_type&, const state_type&, const tensor_type&, const matrix_type&)> log_momentum_function_         ;
+  std::function<matrix_type (const state_type&, tensor_type*)>                                              tensor_function_               ;
+
+  std::uint32_t                                                                                             leap_steps_                    ;
+  std::uint32_t                                                                                             fixed_point_steps_             ;
+  density_type                                                                                              step_size_                     ;
+
+  random_number_generator<proposal_distribution_type>                                                       proposal_rng_                  ;
+  random_number_generator<std::uniform_real_distribution<density_type>>                                     acceptance_rng_                ;
+  
+  density_type                                                                                              constant_term_                 ;
+  density_type                                                                                              potential_energy_              ;
+  density_type                                                                                              kinetic_energy_                ;
+
+  tensor_type                                                                                               previous_tensor_               ;
+  matrix_type                                                                                               previous_tensor_matrix_        ;
+  matrix_type                                                                                               previous_inverse_tensor_matrix_;
+
+  tensor_type                                                                                               tensor_                        ;
+  matrix_type                                                                                               tensor_matrix_                 ;
+  matrix_type                                                                                               inverse_tensor_matrix_         ;
 };
 }
 
