@@ -30,15 +30,15 @@ public:
     const std::uint32_t                                                 fixed_point_steps          = 5u,
     const density_type                                                  step_size                  = density_type(1),
     const proposal_distribution_type&                                   proposal_distribution      = proposal_distribution_type())
-  : tensor_function_      (tensor_function)
-  , leap_steps_           (leap_steps)
-  , fixed_point_steps_    (fixed_point_steps)
-  , step_size_            (step_size)
-  , proposal_rng_         (proposal_distribution)
-  , acceptance_rng_       (0, 1)
-  , constant_term_        (0)
-  , potential_energy_     (0)
-  , kinetic_energy_       (0)
+  : tensor_function_  (tensor_function)
+  , leap_steps_       (leap_steps)
+  , fixed_point_steps_(fixed_point_steps)
+  , step_size_        (step_size)
+  , proposal_rng_     (proposal_distribution)
+  , acceptance_rng_   (0, 1)
+  , constant_term_    (0)
+  , potential_energy_ (0)
+  , kinetic_energy_   (0)
   {
     log_target_density_function_ = [=] (const state_type& state) -> density_type
     {
@@ -58,7 +58,7 @@ public:
         Eigen::MatrixXf temp = inverse_tensor_matrix * tensor_to_matrix(sliced_tensor.expression(), dimensions[0], dimensions[1]);
         gradients[i]         = -gradients[i] + density_type(0.5) * (temp.trace() - (momentum.transpose() * temp * inverse_tensor_matrix * momentum));
       }
-      return momentum + step_size_ * gradients / density_type(2);
+      return step_size_ * gradients / density_type(2);
     };
   }
   riemannian_manifold_hamiltonian_monte_carlo_sampler           (const riemannian_manifold_hamiltonian_monte_carlo_sampler&  that) = default;
