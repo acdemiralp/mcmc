@@ -17,8 +17,8 @@ TEST_CASE("Metropolis adjusted Langevin sampler is tested.", "[mcmc::metropolis_
   Eigen::VectorXf initial_state(1);
   initial_state[0] = 1000.0f;
   
-  Eigen::MatrixXf covariance_matrix(1, 1);
-  covariance_matrix.setIdentity();
+  Eigen::MatrixXf precondition_matrix(1, 1);
+  precondition_matrix.setIdentity();
 
   auto log_likelihood_density = [ ] (const Eigen::VectorXf& state, const Eigen::VectorXf& data, const float sigma = 1.0f)
   {
@@ -29,12 +29,12 @@ TEST_CASE("Metropolis adjusted Langevin sampler is tested.", "[mcmc::metropolis_
     return -0.5f * std::log(2.0f * M_PI) - std::log(sigma) - std::pow(state[0] - mu, 2) / (2.0f * std::pow(sigma, 2));
   };
 
-  mcmc::metropolis_adjusted_langevin_sampler<Eigen::VectorXf, Eigen::MatrixXf, std::normal_distribution<float>> sampler(
-    [=] (const Eigen::VectorXf& state)
+  mcmc::metropolis_adjusted_langevin_sampler<float, Eigen::VectorXf, Eigen::MatrixXf, std::normal_distribution<float>> sampler(
+    [=] (const Eigen::VectorXf& state, Eigen::VectorXf* gradients)
     {
       return log_likelihood_density(state, data, 0.1f) + log_prior_density(state, 0.0f, 1.0f);
     },
-    covariance_matrix, 
+    precondition_matrix, 
     1.0f);
   sampler.setup(initial_state);
 
