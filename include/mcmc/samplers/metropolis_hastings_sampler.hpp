@@ -3,7 +3,6 @@
 
 #include <functional>
 #include <math.h>
-#include <random>
 
 #include <external/Eigen/Cholesky>
 #include <external/Eigen/Core>

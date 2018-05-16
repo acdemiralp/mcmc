@@ -3,9 +3,9 @@
 
 #define _USE_MATH_DEFINES
 
-#include <cmath>
+#include <cstdint>
 #include <functional>
-#include <random>
+#include <math.h>
 
 #include <external/Eigen/Dense>
 #include <external/unsupported/Eigen/CXX11/Tensor>

@@ -1,9 +1,8 @@
 #ifndef MCMC_METROPOLIS_ADJUSTED_LANGEVIN_SAMPLER_HPP_
 #define MCMC_METROPOLIS_ADJUSTED_LANGEVIN_SAMPLER_HPP_
 
-#include <cmath>
 #include <functional>
-#include <random>
+#include <math.h>
 
 #include <external/Eigen/Cholesky>
 #include <external/Eigen/Core>
