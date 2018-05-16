@@ -2,8 +2,10 @@
 
 #define _USE_MATH_DEFINES
 
-#include <math.h>
 #include <iostream>
+#include <math.h>
+
+#include <Eigen/Dense>
 
 #include <mcmc/samplers/metropolis_adjusted_langevin_sampler.hpp>
 #include <mcmc/markov_chain.hpp>
@@ -11,35 +13,34 @@
 
 TEST_CASE("Metropolis adjusted Langevin sampler is tested.", "[mcmc::metropolis_adjusted_langevin_sampler]")
 {
-  mcmc::random_number_generator<std::normal_distribution<float>> data_generator(250.0f, 0.1f);
-  const auto data = data_generator.generate<Eigen::VectorXf>(100);
+  mcmc::random_number_generator<std::normal_distribution<float>> data_generator(10.0f, 5.0f);
+  const auto data = data_generator.generate<Eigen::VectorXf>(1000);
   
-  Eigen::VectorXf initial_state(1);
-  initial_state[0] = 1000.0f;
+  Eigen::VectorXf initial_state(2);
+  initial_state[0] = 100.0f;
+  initial_state[1] = 100.0f;
   
-  Eigen::MatrixXf precondition_matrix(1, 1);
+  Eigen::MatrixXf precondition_matrix(2, 2);
   precondition_matrix.setIdentity();
-
-  auto log_likelihood_density = [ ] (const Eigen::VectorXf& state, const Eigen::VectorXf& data, const float sigma = 1.0f)
-  {
-    return -static_cast<float>(data.size()) * (0.5f * std::log(2.0f * M_PI) + std::log(sigma)) - ((data.array() - state[0]).pow(2) / (2.0f * std::pow(sigma, 2))).sum();
-  };
-  auto log_prior_density      = [ ] (const Eigen::VectorXf& state, const float mu = 0.0f, const float sigma = 1.0f)
-  {
-    return -0.5f * std::log(2.0f * M_PI) - std::log(sigma) - std::pow(state[0] - mu, 2) / (2.0f * std::pow(sigma, 2));
-  };
 
   mcmc::metropolis_adjusted_langevin_sampler<float, Eigen::VectorXf, Eigen::MatrixXf, std::normal_distribution<float>> sampler(
     [=] (const Eigen::VectorXf& state, Eigen::VectorXf* gradients)
     {
-      return log_likelihood_density(state, data, 0.1f) + log_prior_density(state, 0.0f, 1.0f);
+      if(gradients)
+      {
+        (*gradients)[0] = (data.array() - state[0])       .sum() / std::pow(state[1], 2);
+        (*gradients)[1] = (data.array() - state[0]).pow(2).sum() / std::pow(state[1], 3) - static_cast<float>(data.size()) / state[1];
+      }
+      return -static_cast<float>(data.size()) * (0.5f * std::log(2.0f * M_PI) + std::log(state[1])) - ((data.array() - state[0]).pow(2) / (2.0f * std::pow(state[1], 2))).sum();
     },
-    [=] (const Eigen::VectorXf& state, const float& mean, const Eigen::MatrixXf& precondition_matrix)
+    [=] (const Eigen::VectorXf& state, const Eigen::VectorXf& mu, const Eigen::MatrixXf& sigma)
     {
-      return 0.0f;
+      return 
+        - 0.5f * state.size() * std::log(2.0f * M_PI) 
+        - 0.5f * (std::log(sigma.determinant()) + (state - mu).transpose() * sigma.inverse() * (state - mu));
     },
     precondition_matrix, 
-    1.0f);
+    0.1f);
   sampler.setup(initial_state);
 
   mcmc::markov_chain<Eigen::VectorXf> markov_chain(initial_state);

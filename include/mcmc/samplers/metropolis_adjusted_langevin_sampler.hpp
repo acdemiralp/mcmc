@@ -21,11 +21,11 @@ class metropolis_adjusted_langevin_sampler
 {
 public:
   explicit metropolis_adjusted_langevin_sampler(
-    const std::function<density_type(const state_type&, state_type*)>&                             log_target_density_function  ,
-    const std::function<density_type(const state_type&, const density_type&, const matrix_type&)>& log_proposal_density_function,
-    const matrix_type&                                                                             precondition_matrix          ,
-    const density_type                                                                             step_size                    = density_type(1),
-    const proposal_distribution_type&                                                              proposal_distribution        = proposal_distribution_type())
+    const std::function<density_type(const state_type&, state_type*)>&                           log_target_density_function  ,
+    const std::function<density_type(const state_type&, const state_type&, const matrix_type&)>& log_proposal_density_function,
+    const matrix_type&                                                                           precondition_matrix          ,
+    const density_type                                                                           step_size                    = density_type(1),
+    const proposal_distribution_type&                                                            proposal_distribution        = proposal_distribution_type())
   : log_proposal_density_function_(log_proposal_density_function)
   , precondition_matrix_          (precondition_matrix)
   , llt_precondition_matrix_      (precondition_matrix.llt().matrixLLT())
@@ -57,9 +57,9 @@ public:
   }
   state_type   apply (const state_type& state)
   {
-    state_type random     = proposal_rng_.template generate<state_type>(state.size());
-    state_type next_state = log_mean_function_(state) + step_size_ * llt_precondition_matrix_ * random;
-    const auto density    = log_target_density_function_(next_state);
+    const state_type   random     = proposal_rng_.template generate<state_type>(state.size());
+    const state_type   next_state = log_mean_function_(state) + step_size_ * llt_precondition_matrix_ * random;
+    const density_type density    = log_target_density_function_(next_state);
     if (std::exp(std::min(density_type(0), density - current_density_ + adjust(state, next_state))) < acceptance_rng_.generate())
       return state;
     current_density_ = density;
@@ -74,15 +74,15 @@ protected:
            log_proposal_density_function_(next_state, log_mean_function_(state     ), matrix);
   }
 
-  std::function<density_type(const state_type&)>                                          log_target_density_function_  ;
-  std::function<state_type  (const state_type&)>                                          log_mean_function_            ;
-  std::function<density_type(const state_type&, const density_type&, const matrix_type&)> log_proposal_density_function_;
-  matrix_type                                                                             precondition_matrix_          ;
-  matrix_type                                                                             llt_precondition_matrix_      ;
-  density_type                                                                            step_size_                    ;
-  random_number_generator<proposal_distribution_type>                                     proposal_rng_                 ;
-  random_number_generator<std::uniform_real_distribution<density_type>>                   acceptance_rng_               ;
-  density_type                                                                            current_density_              ;
+  std::function<density_type(const state_type&)>                                        log_target_density_function_  ;
+  std::function<state_type  (const state_type&)>                                        log_mean_function_            ;
+  std::function<density_type(const state_type&, const state_type&, const matrix_type&)> log_proposal_density_function_;
+  matrix_type                                                                           precondition_matrix_          ;
+  matrix_type                                                                           llt_precondition_matrix_      ;
+  density_type                                                                          step_size_                    ;
+  random_number_generator<proposal_distribution_type>                                   proposal_rng_                 ;
+  random_number_generator<std::uniform_real_distribution<density_type>>                 acceptance_rng_               ;
+  density_type                                                                          current_density_              ;
 };
 }
 
