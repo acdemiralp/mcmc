@@ -33,7 +33,8 @@ void main()
 See the tests for the details and usage of individual samplers.
 
 ## Notes ##
-All kernel functions should return logarithmic scale values unless explicitly stated otherwise.
+- All kernel functions should return logarithmic scale values unless explicitly stated otherwise.
+- [Boost/Math](https://www.boost.org/doc/libs/1_36_0/libs/math/doc/sf_and_dist/html/math_toolkit/dist/dist_ref/nmp.html#math.dist.pdf) provides probability density functions for common distributions.
 
 ## Coverage ##
 The following list is based on https://m-clark.github.io/docs/ld_mcmc/index_onepage.html with a few extensions. Please feel free to add any missing samplers.
@@ -89,4 +90,4 @@ The following list is based on https://m-clark.github.io/docs/ld_mcmc/index_onep
 - Quasi-random number generators (van der Corput-Halton sequence, Faure-Niederreiter sequence, Hammersley set, Poisson disk sampling, Sobol low-discrepancy sequence, ...).
 
 ## Acknowledgements ##
-The majority of the samplers in this library are inspired by Keith O'Hara's library with the same name: https://github.com/kthohr/mcmc
+The majority of the samplers in this library are inspired by [Keith O'Hara's library with the same name](https://github.com/kthohr/mcmc).
