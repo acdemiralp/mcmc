@@ -37,7 +37,7 @@ See the tests for the details and usage of individual samplers.
 - [Boost/Math](https://www.boost.org/doc/libs/1_36_0/libs/math/doc/sf_and_dist/html/math_toolkit/dist/dist_ref/nmp.html#math.dist.pdf) provides probability density functions for common distributions.
 
 ## Coverage ##
-The following list is based on https://m-clark.github.io/docs/ld_mcmc/index_onepage.html with a few extensions. Please feel free to add any missing samplers.
+The following list is based on [Michael Clark's MCMC algorithms directory](https://m-clark.github.io/docs/ld_mcmc/index_onepage.html) with a few extensions. Please feel free to add any missing samplers.
 - [ ] Adaptive Directional Metropolis-within-Gibbs
 - [x] Adaptive Equi-Energy Sampler
 - [ ] Adaptive Griddy-Gibbs
