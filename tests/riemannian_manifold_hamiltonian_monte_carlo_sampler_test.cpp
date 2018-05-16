@@ -15,8 +15,8 @@ TEST_CASE("Riemannian manifold Hamiltonian Monte Carlo sampler is tested.", "[mc
   const auto data = data_generator.generate<Eigen::VectorXf>(1000);
   
   Eigen::VectorXf initial_state(2);
-  initial_state[0] = 100.0f;
-  initial_state[1] = 100.0f;
+  initial_state[0] = 15.0f;
+  initial_state[1] = 10.0f;
   
   mcmc::riemannian_manifold_hamiltonian_monte_carlo_sampler<float, Eigen::VectorXf, Eigen::MatrixXf, Eigen::Tensor<float, 3>, std::normal_distribution<float>> sampler(
     [=] (const Eigen::VectorXf& state, Eigen::VectorXf* gradients)
@@ -28,12 +28,15 @@ TEST_CASE("Riemannian manifold Hamiltonian Monte Carlo sampler is tested.", "[mc
       }
       return -static_cast<float>(data.size()) * (0.5f * std::log(2.0f * M_PI) + std::log(state[1])) - ((data.array() - state[0]).pow(2) / (2.0f * std::pow(state[1], 2))).sum();
     },
-    [&] (const Eigen::VectorXf& state, Eigen::Tensor<float, 3>* tensor)
+    [=] (const Eigen::VectorXf& state, Eigen::Tensor<float, 3>* tensor)
     {
       auto value = static_cast<float>(data.size()) / std::pow(state[1], 2);
+
       Eigen::MatrixXf matrix(2, 2);
+      matrix.setIdentity();
       matrix(0, 0) =        value;
       matrix(1, 1) = 2.0f * value;
+    
       if(tensor)
       {
         auto coefficients = -2.0f * matrix / state[1];
@@ -46,9 +49,9 @@ TEST_CASE("Riemannian manifold Hamiltonian Monte Carlo sampler is tested.", "[mc
       }
       return matrix;
     },
-    2,
-    5,
-    0.1f);
+    4,
+    4,
+    0.02f);
   sampler.setup(initial_state);
 
   mcmc::markov_chain<Eigen::VectorXf> markov_chain(initial_state);
