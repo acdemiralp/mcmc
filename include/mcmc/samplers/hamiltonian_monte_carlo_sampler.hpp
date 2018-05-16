@@ -22,7 +22,7 @@ public:
   explicit hamiltonian_monte_carlo_sampler(
     const std::function<density_type(const state_type&, state_type*)>& log_target_density_function,
     const precondition_matrix_type&                                    precondition_matrix        ,
-    const std::uint32_t                                                leap_steps                      = 1u,
+    const std::uint32_t                                                leap_steps                 = 1u,
     const density_type                                                 step_size                  = density_type(1),
     const proposal_distribution_type&                                  proposal_distribution      = proposal_distribution_type())
   : precondition_matrix_        (precondition_matrix.llt().matrixLLT())
