@@ -34,6 +34,10 @@ TEST_CASE("Metropolis adjusted Langevin sampler is tested.", "[mcmc::metropolis_
     {
       return log_likelihood_density(state, data, 0.1f) + log_prior_density(state, 0.0f, 1.0f);
     },
+    [=] (const Eigen::VectorXf& state, const float& mean, const Eigen::MatrixXf& precondition_matrix)
+    {
+      return 0.0f;
+    },
     precondition_matrix, 
     1.0f);
   sampler.setup(initial_state);
