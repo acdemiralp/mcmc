@@ -27,7 +27,7 @@ public:
     const bool                                            jumping                    = false,
     const std::uint32_t                                   jumping_interval           = 10,
     const scalar_type                                     jump_gamma                 = scalar_type(2),
-    const std::function<scalar_type(std::uint32_t)>&      temperature_function       = [ ] (std::uint32_t index) { return scalar_type(1); })
+    const std::function<scalar_type(std::uint32_t)>&      temperature_function       = std::bind(default_temperature_function, std::placeholders::_1))
   : log_target_density_function_(log_target_density_function          )
   , temperature_function_       (temperature_function                 )
   , populations_                (populations                          )
@@ -106,27 +106,32 @@ public:
     return next_state;
   }
 
-protected:                                                               
-  std::function<scalar_type(const matrix_type&)>                         log_target_density_function_;
-  std::function<scalar_type(std::uint32_t)>                              temperature_function_       ;
-                                                                         
-  std::uint32_t                                                          populations_                ;
-  vector_type                                                            lower_bounds_               ;
-  vector_type                                                            upper_bounds_               ;
-  scalar_type                                                            bandwidth_factor_           ;
-  bool                                                                   jumping_                    ;
-  std::uint32_t                                                          jumping_interval_           ;
-  scalar_type                                                            jump_gamma_                 ;
+protected:
+  static scalar_type default_temperature_function(std::uint32_t index)
+  {
+    return scalar_type(1);
+  }
   
-  random_number_generator<std::uniform_real_distribution<scalar_type>>   generation_rng_             ;
-  random_number_generator<std::uniform_int_distribution <std::uint32_t>> selection_rng_              ;
-  random_number_generator<std::uniform_real_distribution<scalar_type>>   proposal_rng_               ;
-  random_number_generator<std::uniform_real_distribution<scalar_type>>   acceptance_rng_             ;
-  
-  scalar_type                                                            gamma_                      ;
-  scalar_type                                                            current_gamma_              ;
-  std::uint32_t                                                          current_iteration_          ;
-  vector_type                                                            fitness_vector_             ;
+  std::function<scalar_type(const matrix_type&)>                         log_target_density_function_  ;
+  std::function<scalar_type(std::uint32_t)>                              temperature_function_         ;
+                                                                                                       
+  std::uint32_t                                                          populations_                  ;
+  vector_type                                                            lower_bounds_                 ;
+  vector_type                                                            upper_bounds_                 ;
+  scalar_type                                                            bandwidth_factor_             ;
+  bool                                                                   jumping_                      ;
+  std::uint32_t                                                          jumping_interval_             ;
+  scalar_type                                                            jump_gamma_                   ;
+                                                                                                       
+  random_number_generator<std::uniform_real_distribution<scalar_type>>   generation_rng_               ;
+  random_number_generator<std::uniform_int_distribution <std::uint32_t>> selection_rng_                ;
+  random_number_generator<std::uniform_real_distribution<scalar_type>>   proposal_rng_                 ;
+  random_number_generator<std::uniform_real_distribution<scalar_type>>   acceptance_rng_               ;
+                                                                                                       
+  scalar_type                                                            gamma_                        ;
+  scalar_type                                                            current_gamma_                ;
+  std::uint32_t                                                          current_iteration_            ;
+  vector_type                                                            fitness_vector_               ;
 };
 }
 
