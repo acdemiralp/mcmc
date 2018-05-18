@@ -112,7 +112,7 @@ protected:
     return scalar_type(1);
   }
   
-  std::function<scalar_type(const matrix_type&)>                         log_target_density_function_  ;
+  std::function<scalar_type(const vector_type&)>                         log_target_density_function_  ;
   std::function<scalar_type(std::uint32_t)>                              temperature_function_         ;
                                                                                                        
   std::uint32_t                                                          populations_                  ;
