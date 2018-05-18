@@ -1,5 +1,5 @@
 ## Getting Started ##
-Copy the include folder to your project. Done.
+Copy the include folder to your project.
 
 ## Example Usage (Random Walk a Normal distribution) ##
 ```cpp
@@ -37,7 +37,8 @@ See the tests for the details and usage of individual samplers.
 - [Boost/Math](https://www.boost.org/doc/libs/1_36_0/libs/math/doc/sf_and_dist/html/math_toolkit/dist/dist_ref/nmp.html#math.dist.pdf) provides probability density functions for common distributions.
 
 ## Coverage ##
-The following list is based on [Michael Clark's MCMC algorithms directory](https://m-clark.github.io/docs/ld_mcmc/index_onepage.html) with a few extensions. Please feel free to add any missing samplers.
+The following list is based on [Michael Clark's MCMC algorithms directory](https://m-clark.github.io/docs/ld_mcmc/index_onepage.html) with a few extensions.
+Please feel free to add any missing samplers.
 - [ ] Adaptive Directional Metropolis-within-Gibbs
 - [x] Adaptive Equi-Energy Sampler
 - [ ] Adaptive Griddy-Gibbs
@@ -57,11 +58,13 @@ The following list is based on [Michael Clark's MCMC algorithms directory](https
 - [ ] Griddy-Gibbs
 - [x] Hamiltonian Monte Carlo
 - [ ] Hamiltonian Monte Carlo with Dual-Averaging
+- [ ] Hessian-Hamiltonian Monte Carlo
 - [ ] Hit-And-Run Metropolis
 - [x] Independence Metropolis
 - [ ] Interchain Adaptation
 - [x] Metropolis-Adjusted Langevin Algorithm
 - [ ] Metropolis-Coupled Markov Chain Monte Carlo
+- [x] Metropolis-Hastings 1953
 - [ ] Metropolis-within-Gibbs
 - [ ] Multiple-Try Metropolis
 - [ ] No-U-Turn Sampler
@@ -78,16 +81,25 @@ The following list is based on [Michael Clark's MCMC algorithms directory](https
 - [ ] Sequential Adaptive Metropolis-within-Gibbs
 - [ ] Sequential Metropois-within-Gibbs
 - [ ] Slice Sampler
+- [ ] Stochastic Gradient Fisher Scoring
 - [ ] Stochastic Gradient Langevin Dynamics
+- [ ] Stochastic Gradient Nose-Hoover Thermostat
 - [ ] T-Walk
 - [ ] Tempered Hamiltonian Monte Carlo
 - [ ] Univariate Eigenvector Slice Sampler
 - [ ] Updating Sequential Adaptive Metropolis-within-Gibbs
 - [ ] Updating Sequential Metropolis-within-Gibbs
 
+The following list contains stochastic Variational Inference (VI) samplers.
+- [ ] Black Box Sampler
+- [ ] Doubly Stochastic Sampler
+- [ ] Nonparametric Sampler
+- [ ] Particle Mirror Descent Sampler
+- [ ] Stein Variational Gradient Descent
+
 ## Future Work ##
 - More samplers.
 - Quasi-random number generators (van der Corput-Halton sequence, Faure-Niederreiter sequence, Hammersley set, Poisson disk sampling, Sobol low-discrepancy sequence, ...).
 
 ## Acknowledgements ##
-The majority of the samplers in this library are inspired by [Keith O'Hara's library with the same name](https://github.com/kthohr/mcmc).
+Several samplers in this library are inspired by [Keith O'Hara's library with the same name](https://github.com/kthohr/mcmc).
