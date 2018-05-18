@@ -2,6 +2,7 @@
 
 #define _USE_MATH_DEFINES
 
+#include <limits>
 #include <math.h>
 #include <iostream>
 
@@ -17,9 +18,9 @@ TEST_CASE("Differential evolution sampler is tested.", "[mcmc::differential_evol
   Eigen::VectorXf lower_bounds (1);
   Eigen::VectorXf upper_bounds (1);
   Eigen::VectorXf initial_state(1);
-  lower_bounds [0] = 0.0f    ;
-  upper_bounds [0] = 10000.0f;
-  initial_state[0] = 1000.0f ;
+  lower_bounds [0] = -10000000.0f;
+  upper_bounds [0] =  10000000.0f;
+  initial_state[0] =  100000.0f  ;
   
   auto log_likelihood_density = [ ] (const Eigen::VectorXf& state, const Eigen::VectorXf& data, const float sigma = 1.0f)
   {
