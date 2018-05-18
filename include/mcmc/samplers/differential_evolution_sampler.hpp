@@ -88,10 +88,10 @@ public:
       while (lhs_index == i )                          lhs_index = selection_rng_.generate();
       while (rhs_index == i || lhs_index == rhs_index) rhs_index = selection_rng_.generate();
 
-      const auto random      = proposal_rng_.template generate<vector_type>(state.size());
-      const auto proposal    = next_state.row(i) + current_gamma_ * (next_state.row(lhs_index) - next_state.row(rhs_index)) + random;
-      const auto fitness     = log_target_density_function_(proposal.transpose());
-      const auto temperature = temperature_function_       (current_iteration_  );
+      const vector_type random      = proposal_rng_.template generate<vector_type>(state.cols());
+      const vector_type proposal    = next_state.row(i) + current_gamma_ * (next_state.row(lhs_index) - next_state.row(rhs_index)) + random;
+      const scalar_type fitness     = log_target_density_function_(proposal.transpose());
+      const scalar_type temperature = temperature_function_       (current_iteration_  );
       if (std::exp(fitness - fitness_vector_[i]) / temperature < acceptance_rng_.generate())
         continue;
       fitness_vector_[i] = fitness ;
