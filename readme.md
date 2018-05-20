@@ -95,7 +95,7 @@ The following list contains stochastic Variational Inference (VI) samplers.
 - [ ] Doubly Stochastic Sampler
 - [ ] Nonparametric Sampler
 - [ ] Particle Mirror Descent Sampler
-- [ ] Stein Variational Gradient Descent
+- [x] Stein Variational Gradient Descent
 
 ## Future Work ##
 - More samplers.
