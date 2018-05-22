@@ -56,7 +56,7 @@ public:
   }
 
 protected:
-  std::function<vector_type(const vector_type&)>                     log_target_gradient_function_;
+  std::function<vector_type(const vector_type&)>                     log_target_gradient_function_; // Consider a matrix for processing all particles at once.
   std::function<matrix_type(const vector_type&, const vector_type&)> kernel_function_             ;
   std::size_t                                                        particles_                   ;
   scalar_type                                                        step_size_                   ;

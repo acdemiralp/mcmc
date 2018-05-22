@@ -14,8 +14,9 @@ TEST_CASE("Stein Variational Gradient Descent (SVGD) sampler is tested.", "[mcmc
   mcmc::random_number_generator<std::normal_distribution<float>> data_generator(250.0f, 0.1f);
   const auto data = data_generator.generate<Eigen::VectorXf>(100);
   
-  Eigen::VectorXf initial_state(1);
+  Eigen::VectorXf initial_state(2);
   initial_state[0] = 1000.0f;
+  initial_state[1] = 1000.0f;
   
   mcmc::stein_variational_gradient_descent_sampler<float, Eigen::VectorXf, Eigen::MatrixXf> sampler(
     [=] (const Eigen::VectorXf& state)
