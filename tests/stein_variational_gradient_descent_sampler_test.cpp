@@ -1,9 +1,7 @@
 #include "catch.hpp"
 
-#define _USE_MATH_DEFINES
-
-#include <math.h>
 #include <iostream>
+#include <math.h>
 
 #include <mcmc/samplers/stein_variational_gradient_descent_sampler.hpp>
 #include <mcmc/markov_chain.hpp>
@@ -14,20 +12,22 @@ TEST_CASE("Stein Variational Gradient Descent (SVGD) sampler is tested.", "[mcmc
   mcmc::random_number_generator<std::normal_distribution<float>> data_generator(250.0f, 0.1f);
   const auto data = data_generator.generate<Eigen::VectorXf>(100);
   
-  Eigen::VectorXf initial_state(2);
-  initial_state[0] = 1000.0f;
-  initial_state[1] = 1000.0f;
-  
-  mcmc::stein_variational_gradient_descent_sampler<float, Eigen::VectorXf, Eigen::MatrixXf> sampler(
-    [=] (const Eigen::VectorXf& state)
+  mcmc::stein_variational_gradient_descent_sampler<float, Eigen::VectorXf, Eigen::MatrixXf, std::normal_distribution<float>> sampler(
+    [=] (const Eigen::MatrixXf& state)
     {
-      Eigen::VectorXf gradients(state.size());
-      gradients[0] = (data.array() - state[0])       .sum() / std::pow(state[1], 2);
-      gradients[1] = (data.array() - state[0]).pow(2).sum() / std::pow(state[1], 3) - static_cast<float>(data.size()) / state[1];
+      Eigen::MatrixXf gradients(state.rows(), state.cols());
+      for (auto i = 0; i < state.rows(); ++i)
+      {
+        gradients(i, 0) = (data.array() - state(i, 0))       .sum() / std::pow(state(i, 1), 2);
+        gradients(i, 1) = (data.array() - state(i, 0)).pow(2).sum() / std::pow(state(i, 1), 3) - static_cast<float>(data.size()) / state(i, 1);
+      }
       return gradients;
-    });
+    },
+    2,
+    1000,
+    0.1f);
 
-  mcmc::markov_chain<Eigen::MatrixXf> markov_chain(sampler.setup(initial_state));
+  mcmc::markov_chain<Eigen::MatrixXf> markov_chain(sampler.setup());
   for(auto i = 0; i < 10000; ++i)
   {
     markov_chain.update(sampler);
