@@ -6,6 +6,7 @@
 #include <functional>
 #include <random>
 
+#include <external/unsupported/Eigen/MatrixFunctions>
 #include <external/Eigen/Core>
 
 #include <mcmc/random_number_generator.hpp>
@@ -24,7 +25,7 @@ public:
     const std::function<matrix_type(const matrix_type&)>                 log_target_gradient_function,
     const std::size_t                                                    states                      = std::size_t(1)             ,
     const std::size_t                                                    particles                   = std::size_t(1000)          ,
-    const scalar_type                                                    step_size                   = scalar_type(0.1 )          ,
+    const scalar_type                                                    step_size                   = scalar_type(0.1)           ,
     const std::function<std::array<matrix_type, 2>(const matrix_type&)>  kernel_function             = default_kernel_function    ,
     const initial_distribution_type&                                     initial_distribution        = initial_distribution_type())
   : log_target_gradient_function_(log_target_gradient_function)
@@ -56,14 +57,14 @@ public:
 protected:
   static std::array<matrix_type, 2> default_kernel_function(const matrix_type& state)
   {
-    matrix_type k (state.rows(), state.rows());
-    matrix_type dk(state.rows(), state.cols());
-    k .setIdentity();
-    dk.setIdentity();
-    //matrix_type k =
-    //  (((state.transpose() * state * -2).colwise() +
-    //    state.colwise().squaredNorm().transpose()).rowwise() +
-    //    state.colwise().squaredNorm()).exp();
+    matrix_type k         = (((state * state.transpose() * -2).rowwise() + state.rowwise().squaredNorm().transpose()).colwise() + state.rowwise().squaredNorm());
+    scalar_type bandwidth = scalar_type(0.1); // median(k) / std::log(k.rows());
+    k = (scalar_type(-0.5) / bandwidth * k).exp();
+
+    matrix_type dk (state.rows(), state.cols());
+    for (auto i = 0; i < state.rows(); ++i)
+      dk.row(i) = scalar_type(1) / bandwidth * k.row(i).dot(state.row(i) - state.rowwise());
+   
     return {k, dk};
   }
 

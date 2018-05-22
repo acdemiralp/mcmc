@@ -24,7 +24,7 @@ TEST_CASE("Stein Variational Gradient Descent (SVGD) sampler is tested.", "[mcmc
       return gradients;
     },
     2,
-    1000,
+    10,
     0.1f);
 
   mcmc::markov_chain<Eigen::MatrixXf> markov_chain(sampler.setup());
