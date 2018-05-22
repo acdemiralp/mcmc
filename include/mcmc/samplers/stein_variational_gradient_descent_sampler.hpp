@@ -3,53 +3,63 @@
 
 #include <cstddef>
 #include <functional>
-#include <math.h>
 
-#include <external/Eigen/Cholesky>
 #include <external/Eigen/Core>
-
-#include <mcmc/random_number_generator.hpp>
 
 namespace mcmc
 {
 template<
-  typename density_type               = float,
-  typename state_type                 = Eigen::VectorXf,
-  typename covariance_matrix_type     = Eigen::MatrixXf,
-  typename proposal_distribution_type = std::normal_distribution<density_type>>
+  typename scalar_type = float,
+  typename vector_type = Eigen::VectorXf,
+  typename matrix_type = Eigen::MatrixXf>
 class stein_variational_gradient_descent_sampler
 {
 public:
   explicit stein_variational_gradient_descent_sampler  (
-    const std::function<density_type(const state_type&)>& log_target_density_function,
-    const std::size_t                                     particles                  = std::size_t (1000),
-    const density_type                                    step_size                  = density_type(0.1 ),
-    const proposal_distribution_type&                     proposal_distribution      = proposal_distribution_type())
-  : log_target_density_function_(log_target_density_function)
-  , proposal_rng_               (proposal_distribution)
-  , acceptance_rng_             (0, 1)
+    const std::function<vector_type(const vector_type&)>& log_target_gradient_function,
+    const std::size_t                                     particles                   = std::size_t(1000),
+    const scalar_type                                     step_size                   = scalar_type(0.1 ))
+  : log_target_gradient_function_(log_target_gradient_function)
+  , particles_                   (particles)
+  , step_size_                   (step_size)
   {
 
   }
   stein_variational_gradient_descent_sampler           (const stein_variational_gradient_descent_sampler&  that) = default;
   stein_variational_gradient_descent_sampler           (      stein_variational_gradient_descent_sampler&& temp) = default;
-  virtual ~stein_variational_gradient_descent_sampler  ()                                                     = default;
+  virtual ~stein_variational_gradient_descent_sampler  ()                                                        = default;
   stein_variational_gradient_descent_sampler& operator=(const stein_variational_gradient_descent_sampler&  that) = default;
   stein_variational_gradient_descent_sampler& operator=(      stein_variational_gradient_descent_sampler&& temp) = default;
 
-  void       setup (const state_type& state)
+  matrix_type setup (const vector_type& state)
   {
-
+    matrix_type next_state(state.size(), particles_);
+    next_state.setZeros();
+    return next_state;
   }
-  state_type apply (const state_type& state)
+  matrix_type apply (const matrix_type& state)
   {
-    return state;
+    matrix_type next_state = state;
+    for (auto i = 0; i < particles_; ++i) // Parallelize.
+    {
+      vector_type particle_i = next_state.col(i);
+      vector_type sum(particle_i.size());
+      for (auto j = 0; j < particles_; ++j) // Parallelize.
+      {
+        vector_type particle_j          = next_state.col(j);
+        vector_type log_target_gradient = log_target_gradient_function_(particle_j);
+        // sum += kernel(particle_j, particle_i) * log_target_gradient + kernel_gradient(particle_j, particle_i)
+      }  
+      next_state.col(i) += (step_size_ / particles_) * sum;
+    }
+    return next_state;
   }
 
 protected:
-  std::function<density_type(const state_type&)>                        log_target_density_function_;
-  random_number_generator<proposal_distribution_type>                   proposal_rng_               ;
-  random_number_generator<std::uniform_real_distribution<density_type>> acceptance_rng_             ;
+  std::function<vector_type(const vector_type&)>                     log_target_gradient_function_;
+  std::function<matrix_type(const vector_type&, const vector_type&)> kernel_function_             ;
+  std::size_t                                                        particles_                   ;
+  scalar_type                                                        step_size_                   ;
 };
 }
 
