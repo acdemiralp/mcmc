@@ -65,7 +65,7 @@ public:
   }
 
 protected:
-  static scalar_type                median(const matrix_type& state)
+  static scalar_type                median                 (const matrix_type& state)
   {
     std::vector<scalar_type> values(state.size());
     std::copy_n     (state .data (), state .size()                     , values.data());
