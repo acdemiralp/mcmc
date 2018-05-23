@@ -48,7 +48,7 @@ public:
   matrix_type                  generate(std::array<std::size_t, 2> size)
   {
     matrix_type matrix(size[0], size[1]);
-    std::generate_n(&matrix[0][0], size[0] * size[1], function());
+    std::generate_n(&matrix(0, 0), size[0] * size[1], function());
     return matrix;
   }
 

@@ -24,6 +24,7 @@ set(PROJECT_SOURCES
   include/mcmc/samplers/metropolis_hastings_sampler.hpp
   include/mcmc/samplers/random_walk_metropolis_hastings_sampler.hpp
   include/mcmc/samplers/riemannian_manifold_hamiltonian_monte_carlo_sampler.hpp
+  include/mcmc/samplers/stein_variational_gradient_descent_sampler.hpp
   include/mcmc/markov_chain.hpp
   include/mcmc/random_number_generator.hpp
 )
@@ -72,6 +73,7 @@ if(BUILD_TESTS)
     tests/metropolis_hastings_sampler_test.cpp
     tests/random_walk_metropolis_hastings_sampler_test.cpp
     tests/riemannian_manifold_hamiltonian_monte_carlo_sampler_test.cpp
+    tests/stein_variational_gradient_descent_sampler_test.cpp
   )
 
   foreach(_SOURCE ${PROJECT_TEST_SOURCES})
