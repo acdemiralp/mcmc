@@ -1,7 +1,6 @@
 #include "catch.hpp"
 
 #include <iostream>
-#include <math.h>
 
 #include <mcmc/samplers/stein_variational_gradient_descent_sampler.hpp>
 #include <mcmc/markov_chain.hpp>
@@ -9,7 +8,7 @@
 
 TEST_CASE("Stein Variational Gradient Descent (SVGD) sampler is tested.", "[mcmc::stein_variational_gradient_descent_sampler]")
 {
-  mcmc::random_number_generator<std::normal_distribution<float>> data_generator(250.0f, 0.1f);
+  mcmc::random_number_generator<std::normal_distribution<float>> data_generator(10.0f, 1.0f);
   const auto data = data_generator.generate<Eigen::VectorXf>(100);
   
   mcmc::stein_variational_gradient_descent_sampler<float, Eigen::VectorXf, Eigen::MatrixXf, std::normal_distribution<float>> sampler(
@@ -24,7 +23,7 @@ TEST_CASE("Stein Variational Gradient Descent (SVGD) sampler is tested.", "[mcmc
       return gradients;
     },
     2,
-    10,
+    100,
     0.1f);
 
   mcmc::markov_chain<Eigen::MatrixXf> markov_chain(sampler.setup());
@@ -36,4 +35,18 @@ TEST_CASE("Stein Variational Gradient Descent (SVGD) sampler is tested.", "[mcmc
 
   // Not trivial for gradient descent.
   // REQUIRE(Approx(markov_chain.state()[0]).epsilon(0.1) == 250.0f);
+}
+
+TEST_CASE("Matrix squared Euclidean distance is tested.", "[mcmc::stein_variational_gradient_descent_sampler]")
+{
+  Eigen::MatrixXf input(4, 2);
+  for (auto i = 0; i < input.rows(); ++i)
+    input.row(i) = Eigen::Vector2f {i, i};
+
+  Eigen::MatrixXf output = 
+    ((input * input.transpose() * -2).rowwise() + input.rowwise().squaredNorm().transpose()).colwise() + input.rowwise().squaredNorm();
+
+  for (auto i = 0; i < input.rows(); ++i)
+    for (auto j = 0; j < input.cols(); ++j)
+      REQUIRE(output(i, j) == (input.row(i) - input.row(j)).array().pow(2).sum());
 }
