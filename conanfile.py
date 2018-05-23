@@ -2,7 +2,7 @@ from   conans       import ConanFile, CMake, tools
 from   conans.tools import download, unzip
 import os
 
-class BmConan(ConanFile):
+class Project(ConanFile):
     name            = "mcmc"
     version         = "1.0.1"					
     description     = "Conan package for mcmc."												 
