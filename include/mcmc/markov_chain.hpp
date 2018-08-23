@@ -1,6 +1,8 @@
 #ifndef MCMC_MARKOV_CHAIN_HPP_
 #define MCMC_MARKOV_CHAIN_HPP_
 
+#include <fstream>
+#include <string>
 #include <vector>
 
 namespace mcmc
@@ -31,6 +33,21 @@ public:
   const std::vector<state_type>& state_history() const
   {
     return state_history_;
+  }
+  void                           to_csv       (const std::string& filepath)
+  {
+    std::ofstream file(filepath);
+    for (auto& state : state_history_)
+    {
+      auto size = state.size();
+      for (auto i = 0; i < size; ++i)
+      {
+        file << state[i];
+        if (i != size - 1) 
+          file << ", ";
+      }
+      file << "\n";
+    }
   }
 
 protected:
