@@ -28,10 +28,10 @@ public:
   {
     
   }
-  random_number_generator           (const random_number_generator&  that) = default;
+  random_number_generator           (const random_number_generator&  that) = delete ;
   random_number_generator           (      random_number_generator&& temp) = default;
   virtual ~random_number_generator  ()                                     = default;
-  random_number_generator& operator=(const random_number_generator&  that) = default;
+  random_number_generator& operator=(const random_number_generator&  that) = delete ;
   random_number_generator& operator=(      random_number_generator&& temp) = default;
 
   result_type                  generate()
