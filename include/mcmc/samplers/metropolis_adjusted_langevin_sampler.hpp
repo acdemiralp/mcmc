@@ -37,11 +37,11 @@ public:
     {
       return log_target_density_function(state, nullptr);
     };
-    log_mean_function_           = [=] (const state_type& state) -> state_type
+    log_mean_function_           = [log_target_density_function, precondition_matrix, step_size] (const state_type& state) -> state_type
     {
       state_type gradients(state.size());
       log_target_density_function(state, &gradients);
-      return state + std::pow(step_size_, 2) * precondition_matrix_ * gradients / density_type(2);
+      return state + std::pow(step_size, 2) * precondition_matrix * gradients / density_type(2);
     };
   }
   metropolis_adjusted_langevin_sampler           (const metropolis_adjusted_langevin_sampler&  that) = default;

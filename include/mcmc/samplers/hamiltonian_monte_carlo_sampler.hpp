@@ -38,11 +38,11 @@ public:
     {
       return log_target_density_function(state, nullptr);
     };
-    log_momentum_function_       = [=] (const state_type& state, state_type& momentum) -> state_type
+    log_momentum_function_       = [log_target_density_function, step_size] (const state_type& state, state_type& momentum) -> state_type
     {
       state_type gradients(state.size());
       log_target_density_function(state, &gradients);
-      return momentum + step_size_ * gradients / density_type(2);
+      return momentum + step_size * gradients / density_type(2);
     };
   }
   hamiltonian_monte_carlo_sampler           (const hamiltonian_monte_carlo_sampler&  that) = default;

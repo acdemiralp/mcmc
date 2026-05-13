@@ -39,8 +39,8 @@ public:
     std::ofstream file(filepath);
     for (auto& state : state_history_)
     {
-      auto size = state.size();
-      for (auto i = 0; i < size; ++i)
+      const auto size = static_cast<std::size_t>(state.size());
+      for (std::size_t i = 0; i < size; ++i)
       {
         file << state[i];
         if (i != size - 1) 

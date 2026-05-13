@@ -89,13 +89,13 @@ public:
       while (rhs_index == i || lhs_index == rhs_index) rhs_index = selection_rng_.generate();
 
       const vector_type random      = proposal_rng_.template generate<vector_type>(state.cols());
-      const vector_type proposal    = next_state.row(i) + current_gamma_ * (next_state.row(lhs_index) - next_state.row(rhs_index)) + random;
-      const scalar_type fitness     = log_target_density_function_(proposal.transpose());
+      const vector_type proposal    = next_state.row(i).transpose() + current_gamma_ * (next_state.row(lhs_index) - next_state.row(rhs_index)).transpose() + random;
+      const scalar_type fitness     = log_target_density_function_(proposal);
       const scalar_type temperature = temperature_function_       (current_iteration_  );
       if (std::exp(std::min(scalar_type(0), (fitness - fitness_vector_[i]) / temperature)) < acceptance_rng_.generate()) // min(0,...) guards against overflow; dividing by temperature implements simulated-annealing tempering correctly as exp(Δ/T)
         continue;
       fitness_vector_[i] = fitness ;
-      next_state.row (i) = proposal;
+      next_state.row (i) = proposal.transpose();
     }
     
     if (jumping_ && (current_iteration_ + 1) % jumping_interval_ == 0)

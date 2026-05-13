@@ -31,10 +31,10 @@ public:
     const matrix_type&                                    covariance_matrix          ,
     const scalar_type                                     scale                      = scalar_type(1),
     const scalar_type                                     interaction_probability    = scalar_type(0.1),
-    const std::uint32_t                                   rings                      = 5u,
-    const proposal_distribution_type&                     proposal_distribution      = proposal_distribution_type())
+      const std::uint32_t                                   rings                      = 5u,
+      const proposal_distribution_type&                     proposal_distribution      = proposal_distribution_type())
   : log_target_density_function_(log_target_density_function)
-  , covariance_matrix_          ((scale * covariance_matrix).llt().matrixLLT())
+  , covariance_matrix_          ((std::pow(scale, 2) * covariance_matrix).llt().matrixLLT())
   , interaction_probability_    (interaction_probability)
   , rings_                      (rings)
   , proposal_rng_               (proposal_distribution)
@@ -64,7 +64,7 @@ public:
     temperatures_.resize(k);
     temperatures_[k - 1] = scalar_type(1);
     std::copy(temperatures .data(), temperatures .data() + temperatures .size(), temperatures_.data());
-    std::sort(temperatures_.data(), temperatures_.data() + temperatures_.size(), [ ] (scalar_type lhs, scalar_type rhs) { return lhs < rhs; });
+    std::sort(temperatures_.data(), temperatures_.data() + temperatures_.size(), [ ] (scalar_type lhs, scalar_type rhs) { return lhs > rhs; });
 
     ring_matrix_       .resize(k, rings_ - 1 ); ring_matrix_       .setZero();
     density_history_   .resize(k, total_draws); density_history_   .setZero();
@@ -78,8 +78,8 @@ public:
     }
     
     matrix_type initial_state(state.size(), k);
-    initial_state.setZero();
-    initial_state.col    (0) = state;
+    initial_state.colwise() = state;
+    state_history_[0] = initial_state;
     return initial_state;
   }
   matrix_type apply(const matrix_type& state)
@@ -90,6 +90,7 @@ public:
 
     previous_densities_ = current_densities_;
     current_densities_.col(0).fill(std::get<1>(mh_output));
+    density_history_(0, iteration_) = std::get<1>(mh_output);
 
     for (auto i = 1; i < temperatures_.size(); ++i) // This for loop is very suitable for parallelization.
     {

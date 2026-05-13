@@ -44,21 +44,21 @@ public:
     {
       return log_target_density_function(state, nullptr);
     };
-    log_momentum_function_       = [=] (const state_type& state, const state_type& momentum, const tensor_type& tensor_derivative, const matrix_type& inverse_tensor_matrix) -> state_type
+    log_momentum_function_       = [log_target_density_function, step_size] (const state_type& state, const state_type& momentum, const tensor_type& tensor_derivative, const matrix_type& inverse_tensor_matrix) -> state_type
     {
       state_type gradients(state.size());
       log_target_density_function(state, &gradients);
       for (auto i = 0; i < gradients.size(); ++i) 
       {
         auto dimensions    = tensor_derivative.dimensions();
-        auto sliced_tensor = tensor_derivative.slice(
-          std::array<std::size_t, 3>{std::size_t(0),             std::size_t(0),             std::size_t(i)}, 
-          std::array<std::size_t, 3>{std::size_t(dimensions[0]), std::size_t(dimensions[1]), std::size_t(1)});
-
-        Eigen::MatrixXf temp = inverse_tensor_matrix * tensor_to_matrix(sliced_tensor.expression(), dimensions[0], dimensions[1]);
+        matrix_type sliced_matrix(dimensions[0], dimensions[1]);
+        for (auto row = 0; row < dimensions[0]; ++row)
+          for (auto column = 0; column < dimensions[1]; ++column)
+            sliced_matrix(row, column) = tensor_derivative(row, column, i);
+        matrix_type temp = inverse_tensor_matrix * sliced_matrix;
         gradients[i]         = gradients[i] - density_type(0.5) * (temp.trace() - (momentum.transpose() * temp * inverse_tensor_matrix * momentum));
       }
-      return step_size_ * gradients / density_type(2);
+      return step_size * gradients / density_type(2);
     };
   }
   riemannian_manifold_hamiltonian_monte_carlo_sampler           (const riemannian_manifold_hamiltonian_monte_carlo_sampler&  that) = default;
@@ -125,11 +125,6 @@ public:
   }
 
 protected:
-  template <std::size_t rank>
-  static auto tensor_to_matrix(const Eigen::Tensor<density_type, rank>& tensor, const std::size_t rows, const std::size_t columns)
-  {
-    return Eigen::Map<const Eigen::Matrix<density_type, Eigen::Dynamic, Eigen::Dynamic>>(tensor.data(), rows, columns);
-  }
   template <typename... dimension_types>
   static auto matrix_to_tensor(const Eigen::Matrix<density_type, Eigen::Dynamic, Eigen::Dynamic>& matrix, dimension_types... dimensions)
   {

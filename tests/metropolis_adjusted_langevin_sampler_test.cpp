@@ -5,7 +5,7 @@
 #include <iostream>
 #include <math.h>
 
-#include <Eigen/Dense>
+#include <external/Eigen/Dense>
 
 #include <mcmc/samplers/metropolis_adjusted_langevin_sampler.hpp>
 #include <mcmc/markov_chain.hpp>
@@ -37,7 +37,7 @@ TEST_CASE("Metropolis adjusted Langevin sampler is tested.", "[mcmc::metropolis_
     {
       return 
         - 0.5f * state.size() * std::log(2.0f * M_PI) 
-        - 0.5f * (std::log(sigma.determinant()) + (state - mu).transpose() * sigma.inverse() * (state - mu));
+        - 0.5f * (std::log(sigma.determinant()) + ((state - mu).transpose() * sigma.inverse() * (state - mu)).coeff(0, 0));
     },
     precondition_matrix, 
     0.1f);
@@ -50,5 +50,6 @@ TEST_CASE("Metropolis adjusted Langevin sampler is tested.", "[mcmc::metropolis_
     std::cout << markov_chain.state().format(Eigen::IOFormat()) << "\n";
   }
 
-  REQUIRE(Approx(markov_chain.state()[0]).epsilon(0.1) == 250.0f);
+  REQUIRE(Approx(markov_chain.state()[0]).epsilon(1.0f) == 10.0f);
+  REQUIRE(Approx(markov_chain.state()[1]).epsilon(1.0f) ==  5.0f);
 }
