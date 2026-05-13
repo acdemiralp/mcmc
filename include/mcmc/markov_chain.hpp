@@ -12,11 +12,13 @@ class markov_chain
 public:
   explicit markov_chain  (
     state_type                                   initial_state ,
-    std::function<void(const state_type& state)> state_callback = {})
+    std::function<void(const state_type& state)> state_callback = {},
+    bool                                         emit_initial_state = false)
   : state_         (std::move(initial_state))
   , state_callback_(std::move(state_callback))
   {
-    
+    if (emit_initial_state && state_callback_)
+      state_callback_(state_);
   }
   markov_chain           (const markov_chain&  that) = default;
   markov_chain           (      markov_chain&& temp) = default;

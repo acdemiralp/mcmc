@@ -17,6 +17,17 @@ TEST_CASE("Markov chain is tested.", "[mcmc::markov_chain]")
     {
       REQUIRE(markov_chain.state() == initial_state);
     }
+    THEN("A constructor callback can emit the initial state immediately.")
+    {
+      std::optional<std::array<float, 4>> observed_state;
+      mcmc::markov_chain<std::array<float, 4>> observed_chain(
+        initial_state,
+        [&](const std::array<float, 4>& state) { observed_state = state; },
+        true);
+
+      REQUIRE(observed_state.has_value());
+      REQUIRE(observed_state.value() == initial_state);
+    }
     THEN("Subscribing can emit the current state immediately.")
     {
       std::optional<std::array<float, 4>> observed_state;

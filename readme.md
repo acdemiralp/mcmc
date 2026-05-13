@@ -24,7 +24,7 @@ void main()
 
   mcmc::markov_chain<Eigen::VectorXf> markov_chain(initial_state);
   markov_chain.subscribe(
-    [ ] (const Eigen::VectorXf& state)
+    [] (const Eigen::VectorXf& state)
     {
       std::cout << state.format(Eigen::IOFormat()) << "\n";
     });
