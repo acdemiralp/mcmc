@@ -7,7 +7,7 @@ cd vcpkg
 if [ ! -f "vcpkg" ] ; then ./bootstrap-vcpkg.sh ; fi
 
 VCPKG_DEFAULT_TRIPLET=x64-linux
-./vcpkg install --x-manifest-root=../..
+./vcpkg install --overlay-ports=../../vcpkg-overlay-ports doctest eigen3
 cd ..
 
 cmake -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake -DBUILD_TESTS=ON ..
