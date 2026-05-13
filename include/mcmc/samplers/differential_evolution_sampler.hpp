@@ -92,7 +92,7 @@ public:
       const vector_type proposal    = next_state.row(i) + current_gamma_ * (next_state.row(lhs_index) - next_state.row(rhs_index)) + random;
       const scalar_type fitness     = log_target_density_function_(proposal.transpose());
       const scalar_type temperature = temperature_function_       (current_iteration_  );
-      if (std::exp(fitness - fitness_vector_[i]) / temperature < acceptance_rng_.generate())
+      if (std::exp(std::min(scalar_type(0), (fitness - fitness_vector_[i]) / temperature)) < acceptance_rng_.generate())
         continue;
       fitness_vector_[i] = fitness ;
       next_state.row (i) = proposal;

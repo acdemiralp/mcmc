@@ -56,7 +56,7 @@ public:
           std::array<std::size_t, 3>{std::size_t(dimensions[0]), std::size_t(dimensions[1]), std::size_t(1)});
 
         Eigen::MatrixXf temp = inverse_tensor_matrix * tensor_to_matrix(sliced_tensor.expression(), dimensions[0], dimensions[1]);
-        gradients[i]         = -gradients[i] + density_type(0.5) * (temp.trace() - (momentum.transpose() * temp * inverse_tensor_matrix * momentum));
+        gradients[i]         = gradients[i] - density_type(0.5) * (temp.trace() - (momentum.transpose() * temp * inverse_tensor_matrix * momentum));
       }
       return step_size_ * gradients / density_type(2);
     };
@@ -79,7 +79,7 @@ public:
     previous_tensor_matrix_         = tensor_matrix_;
     previous_inverse_tensor_matrix_ = inverse_tensor_matrix_;
     
-    potential_energy_               = constant_term_ - log_target_density_function_(state) + std::log(tensor_matrix_.determinant());
+    potential_energy_               = constant_term_ - log_target_density_function_(state) + density_type(0.5) * std::log(tensor_matrix_.determinant());
   }
   state_type apply(const state_type& state)
   {

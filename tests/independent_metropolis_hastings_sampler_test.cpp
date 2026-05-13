@@ -35,10 +35,10 @@ TEST_CASE("Independent Metropolis-Hastings sampler is tested.", "[mcmc::independ
       return log_likelihood_density(state, data, 0.1f) + log_prior_density(state, 0.0f, 1.0f);
     },
     covariance_matrix,
-    std::normal_distribution<float>(0.0f, 1.0f),
+    std::normal_distribution<float>(250.0f, 10.0f),
     [ ] (const Eigen::VectorXf& state)
     {
-      return -0.5f * std::log(2.0f * M_PI) - std::log(1.0f) - std::pow(state[0] - 0.0f, 2) / (2.0f * std::pow(1.0f, 2));
+      return -0.5f * std::log(2.0f * M_PI) - std::log(10.0f) - std::pow(state[0] - 250.0f, 2) / (2.0f * std::pow(10.0f, 2));
     });
   sampler.setup(initial_state);
 

@@ -48,11 +48,11 @@ public:
   state_type apply (const state_type& state)
   {
     state_type random                 = proposal_rng_.template generate<state_type>(state.size());
-    state_type next_state             = state + covariance_matrix_ * random;
+    state_type next_state             = covariance_matrix_ * random;
     const auto density                = log_target_density_function_  (next_state);
     const auto proposal_given_current = log_proposal_density_function_(next_state);
     const auto current_given_proposal = log_proposal_density_function_(state     );
-    if (std::exp(std::min(0.0f, density + proposal_given_current - current_density_ - current_given_proposal)) < acceptance_rng_.generate()) 
+    if (std::exp(std::min(density_type(0), density + current_given_proposal - current_density_ - proposal_given_current)) < acceptance_rng_.generate()) 
       return state;
     current_density_ = density;
     return next_state;

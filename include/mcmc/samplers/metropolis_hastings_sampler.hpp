@@ -52,7 +52,7 @@ public:
     const auto density                = log_target_density_function_  (next_state);
     const auto proposal_given_current = log_proposal_density_function_(next_state, state     );
     const auto current_given_proposal = log_proposal_density_function_(state     , next_state);
-    if (std::exp(std::min(density_type(0), density + proposal_given_current - current_density_ - current_given_proposal)) < acceptance_rng_.generate()) 
+    if (std::exp(std::min(density_type(0), density + current_given_proposal - current_density_ - proposal_given_current)) < acceptance_rng_.generate()) 
       return state;
     current_density_ = density;
     return next_state;
