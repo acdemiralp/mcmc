@@ -50,12 +50,12 @@ public:
       log_target_density_function(state, &gradients);
       for (auto i = 0; i < gradients.size(); ++i) 
       {
-        auto dimensions    = tensor_derivative.dimensions();
+        auto dimensions = tensor_derivative.dimensions();
         auto sliced_tensor = tensor_derivative.slice(
-          std::array<std::size_t, 3>{std::size_t(0),             std::size_t(0),             std::size_t(i)}, 
-          std::array<std::size_t, 3>{std::size_t(dimensions[0]), std::size_t(dimensions[1]), std::size_t(1)});
+          std::array<std::size_t, 3>{std::size_t(0),             std::size_t(0),             std::size_t(i)},
+          std::array<std::size_t, 3>{std::size_t(dimensions[0]), std::size_t(dimensions[1]), std::size_t(1)}).eval();
 
-        Eigen::MatrixXf temp = inverse_tensor_matrix * tensor_to_matrix(sliced_tensor.expression(), dimensions[0], dimensions[1]);
+        Eigen::MatrixXf temp = inverse_tensor_matrix * tensor_to_matrix(sliced_tensor, std::size_t(dimensions[0]), std::size_t(dimensions[1]));
         gradients[i]         = -gradients[i] + density_type(0.5) * (temp.trace() - (momentum.transpose() * temp * inverse_tensor_matrix * momentum));
       }
       return step_size_ * gradients / density_type(2);
