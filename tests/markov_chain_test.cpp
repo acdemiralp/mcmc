@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <doctest/doctest.h>
 
 #include <algorithm>
 #include <array>

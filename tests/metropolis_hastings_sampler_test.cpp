@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <doctest/doctest.h>
 
 #define _USE_MATH_DEFINES
 
@@ -49,5 +49,5 @@ TEST_CASE("Metropolis-Hastings sampler is tested.", "[mcmc::metropolis_hastings_
     std::cout << markov_chain.state().format(Eigen::IOFormat()) << "\n";
   }
 
-  REQUIRE(Approx(markov_chain.state()[0]).epsilon(0.1) == 250.0f);
+  REQUIRE(doctest::Approx(markov_chain.state()[0]).epsilon(0.1) == 250.0f);
 }

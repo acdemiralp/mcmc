@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <doctest/doctest.h>
 
 #define _USE_MATH_DEFINES
 
@@ -36,7 +36,7 @@ TEST_CASE("Gibbs sampler is tested.", "[mcmc::gibbs_sampler]")
 
   for (auto i = 0; i < markov_chain.state().size(); ++i)
   {
-    REQUIRE(Approx(markov_chain.state()[i].real()).epsilon(1.0) == 0.0f);
-    REQUIRE(Approx(markov_chain.state()[i].imag()).epsilon(1.0) == 0.0f);
+    REQUIRE(doctest::Approx(markov_chain.state()[i].real()).epsilon(1.0) == 0.0f);
+    REQUIRE(doctest::Approx(markov_chain.state()[i].imag()).epsilon(1.0) == 0.0f);
   }
 }

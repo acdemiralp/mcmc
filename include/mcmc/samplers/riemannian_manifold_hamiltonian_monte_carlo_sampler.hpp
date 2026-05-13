@@ -7,8 +7,8 @@
 #include <functional>
 #include <math.h>
 
-#include <external/Eigen/Dense>
-#include <external/unsupported/Eigen/CXX11/Tensor>
+#include <Eigen/Dense>
+#include <unsupported/Eigen/CXX11/Tensor>
 
 #include <mcmc/random_number_generator.hpp>
 

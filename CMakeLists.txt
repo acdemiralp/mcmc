@@ -1,95 +1,87 @@
 ##################################################    Project     ##################################################
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 project               (mcmc VERSION 1.0 LANGUAGES CXX)
-list                  (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+list                  (APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 set_property          (GLOBAL PROPERTY USE_FOLDERS ON)
 set                   (CMAKE_CXX_STANDARD 17)
+set                   (CMAKE_CXX_STANDARD_REQUIRED ON)
+set                   (CMAKE_CXX_EXTENSIONS OFF)
+
+if   (MSVC)
+  add_compile_options(/W4)
+else ()
+  add_compile_options(-Wall -Wextra -pedantic)
+endif ()
 
 ##################################################    Options     ##################################################
 option(BUILD_TESTS "Build tests." OFF)
 
 ##################################################    Sources     ##################################################
-set(PROJECT_SOURCES
-  CMakeLists.txt
-  cmake/assign_source_group.cmake
-  cmake/import_library.cmake
-  readme.md
+file(GLOB_RECURSE PROJECT_HEADERS include/*.h include/*.hpp include/*.ipp)
+file(GLOB_RECURSE PROJECT_CMAKE_UTILS cmake/*.cmake)
+file(GLOB_RECURSE PROJECT_MISC *.bat *.gitignore *.md *.py *.sh *.txt *.json)
+set (PROJECT_FILES
+  ${PROJECT_HEADERS}
+  ${PROJECT_CMAKE_UTILS}
+  ${PROJECT_MISC})
 
-  include/mcmc/samplers/adaptive_equi_energy_sampler.hpp
-  include/mcmc/samplers/differential_evolution_sampler.hpp
-  include/mcmc/samplers/gibbs_sampler.hpp
-  include/mcmc/samplers/hamiltonian_monte_carlo_sampler.hpp
-  include/mcmc/samplers/independent_metropolis_hastings_sampler.hpp
-  include/mcmc/samplers/metropolis_adjusted_langevin_sampler.hpp
-  include/mcmc/samplers/metropolis_hastings_sampler.hpp
-  include/mcmc/samplers/random_walk_metropolis_hastings_sampler.hpp
-  include/mcmc/samplers/riemannian_manifold_hamiltonian_monte_carlo_sampler.hpp
-  include/mcmc/samplers/stein_variational_gradient_descent_sampler.hpp
-  include/mcmc/markov_chain.hpp
-  include/mcmc/random_number_generator.hpp
-)
 include(assign_source_group)
-assign_source_group(${PROJECT_SOURCES})
+assign_source_group(${PROJECT_FILES})
 
 ##################################################  Dependencies  ##################################################
-include(import_library)
+find_package(Eigen3 CONFIG REQUIRED)
+list(APPEND PROJECT_LIBRARIES Eigen3::Eigen)
+
+if(BUILD_TESTS)
+  find_package(doctest CONFIG REQUIRED)
+  list(APPEND PROJECT_LIBRARIES doctest::doctest)
+endif()
 
 ##################################################    Targets     ##################################################
 add_library(${PROJECT_NAME} INTERFACE)
-target_include_directories(${PROJECT_NAME} INTERFACE 
+target_include_directories(${PROJECT_NAME} INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/external>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-  $<INSTALL_INTERFACE:include>
-  $<INSTALL_INTERFACE:include/external>)
-target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_INCLUDE_DIRS})
+  $<INSTALL_INTERFACE:include>)
 target_link_libraries     (${PROJECT_NAME} INTERFACE ${PROJECT_LIBRARIES})
-target_compile_options    (${PROJECT_NAME} INTERFACE -DNOMINMAX)
+if(WIN32)
+  target_compile_definitions(${PROJECT_NAME} INTERFACE NOMINMAX)
+endif()
 
 # Hack for header-only project to appear in the IDEs.
-add_library(${PROJECT_NAME}_ STATIC ${PROJECT_SOURCES})
-target_include_directories(${PROJECT_NAME}_ 
-  PUBLIC 
-  ${CMAKE_CURRENT_SOURCE_DIR}/include 
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/external 
-  ${CMAKE_CURRENT_BINARY_DIR})     
-target_include_directories(${PROJECT_NAME}_ PUBLIC ${PROJECT_INCLUDE_DIRS})
+add_library(${PROJECT_NAME}_ STATIC ${PROJECT_FILES})
+target_include_directories(${PROJECT_NAME}_ PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries     (${PROJECT_NAME}_ PUBLIC ${PROJECT_LIBRARIES})
-target_compile_options    (${PROJECT_NAME}_ PUBLIC -DNOMINMAX)
+if(WIN32)
+  target_compile_definitions(${PROJECT_NAME}_ PUBLIC NOMINMAX)
+endif()
 set_target_properties     (${PROJECT_NAME}_ PROPERTIES LINKER_LANGUAGE CXX)
 
 ##################################################    Testing     ##################################################
 if(BUILD_TESTS)
-  enable_testing()
+  enable_testing       ()
+  set                  (TEST_MAIN_NAME test_main)
+  set                  (TEST_MAIN_SOURCES tests/internal/main.cpp)
+  add_library          (${TEST_MAIN_NAME} OBJECT ${TEST_MAIN_SOURCES})
+  target_link_libraries(${TEST_MAIN_NAME} ${PROJECT_NAME})
+  set_property         (TARGET ${TEST_MAIN_NAME} PROPERTY FOLDER tests)
+  assign_source_group  (${TEST_MAIN_SOURCES})
 
-  set(PROJECT_TEST_SOURCES
-    tests/adaptive_equi_energy_sampler_test.cpp
-    tests/differential_evolution_sampler_test.cpp
-    tests/gibbs_sampler_test.cpp
-    tests/hamiltonian_monte_carlo_sampler_test.cpp
-    tests/independent_metropolis_hastings_sampler_test.cpp
-    tests/markov_chain_test.cpp
-    tests/metropolis_adjusted_langevin_sampler_test.cpp
-    tests/metropolis_hastings_sampler_test.cpp
-    tests/random_walk_metropolis_hastings_sampler_test.cpp
-    tests/riemannian_manifold_hamiltonian_monte_carlo_sampler_test.cpp
-    tests/stein_variational_gradient_descent_sampler_test.cpp
-  )
-
-  foreach(_SOURCE ${PROJECT_TEST_SOURCES})
+  file(GLOB PROJECT_TEST_CPPS tests/*.c tests/*.cpp tests/*.cu)
+  foreach(_SOURCE ${PROJECT_TEST_CPPS})
     get_filename_component(_NAME ${_SOURCE} NAME_WE)
-    set                   (_SOURCES tests/catch.hpp tests/main.cpp ${_SOURCE})
-    add_executable        (${_NAME} ${_SOURCES})
-    target_link_libraries (${_NAME} ${PROJECT_NAME})
-    target_compile_options(${_NAME} PUBLIC -DNOMINMAX)
-    add_test              (${_NAME} ${_NAME})
-    set_property          (TARGET ${_NAME} PROPERTY FOLDER "Tests")
-    source_group          ("source" FILES ${_SOURCES})
+    add_executable        (${_NAME} ${_SOURCE} $<TARGET_OBJECTS:${TEST_MAIN_NAME}>)
+    target_link_libraries (${_NAME} ${PROJECT_NAME} ${PROJECT_LIBRARIES})
+    add_test              (NAME ${_NAME} COMMAND ${_NAME})
+    set_property          (TARGET ${_NAME} PROPERTY FOLDER tests)
+    assign_source_group   (${_SOURCE})
   endforeach()
 endif()
 
 ##################################################  Installation  ##################################################
-install(TARGETS ${PROJECT_NAME} EXPORT "${PROJECT_NAME}-config")
+install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}-config)
 install(DIRECTORY include/ DESTINATION include)
-install(EXPORT  "${PROJECT_NAME}-config" DESTINATION "cmake")
-export (TARGETS "${PROJECT_NAME}"        FILE        "${PROJECT_NAME}-config.cmake")
+install(EXPORT  ${PROJECT_NAME}-config DESTINATION cmake)
+export (TARGETS ${PROJECT_NAME}        FILE        ${PROJECT_NAME}-config.cmake)

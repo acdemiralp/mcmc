@@ -10,9 +10,9 @@
 #include <tuple>
 #include <vector>
 
-#include <external/Eigen/Cholesky>
-#include <external/Eigen/Core>
-#include <external/unsupported/Eigen/CXX11/Tensor>
+#include <Eigen/Cholesky>
+#include <Eigen/Core>
+#include <unsupported/Eigen/CXX11/Tensor>
 
 #include <mcmc/random_number_generator.hpp>
 

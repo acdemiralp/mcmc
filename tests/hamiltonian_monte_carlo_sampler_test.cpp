@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <doctest/doctest.h>
 
 #define _USE_MATH_DEFINES
 
@@ -43,6 +43,6 @@ TEST_CASE("Hamiltonian Monte Carlo sampler is tested.", "[mcmc::hamiltonian_mont
     std::cout << markov_chain.state().format(Eigen::IOFormat()) << "\n";
   }
 
-  REQUIRE(Approx(markov_chain.state()[0]).epsilon(1.0f) == 10.0f);
-  REQUIRE(Approx(markov_chain.state()[1]).epsilon(1.0f) ==  5.0f);
+  REQUIRE(doctest::Approx(markov_chain.state()[0]).epsilon(1.0f) == 10.0f);
+  REQUIRE(doctest::Approx(markov_chain.state()[1]).epsilon(1.0f) ==  5.0f);
 }

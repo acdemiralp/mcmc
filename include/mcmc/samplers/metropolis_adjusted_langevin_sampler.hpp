@@ -4,8 +4,8 @@
 #include <functional>
 #include <math.h>
 
-#include <external/Eigen/Cholesky>
-#include <external/Eigen/Core>
+#include <Eigen/Cholesky>
+#include <Eigen/Core>
 
 #include <mcmc/random_number_generator.hpp>
 

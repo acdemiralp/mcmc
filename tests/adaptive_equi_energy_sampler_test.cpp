@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <doctest/doctest.h>
 
 #define _USE_MATH_DEFINES
 
@@ -60,5 +60,5 @@ TEST_CASE("Adaptive equi-energy sampler is tested.", "[mcmc::adaptive_equi_energ
   }
 
   // Not trivial for mixed distributions.
-  // REQUIRE(Approx(markov_chain.state()[0]).epsilon(0.1) == 250.0f);
+  // REQUIRE(doctest::Approx(markov_chain.state()[0]).epsilon(0.1) == 250.0f);
 }

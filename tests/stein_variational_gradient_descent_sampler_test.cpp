@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <doctest/doctest.h>
 
 #include <iostream>
 
@@ -34,7 +34,7 @@ TEST_CASE("Stein Variational Gradient Descent (SVGD) sampler is tested.", "[mcmc
   }
 
   // Not trivial for gradient descent.
-  // REQUIRE(Approx(markov_chain.state()[0]).epsilon(0.1) == 250.0f);
+  // REQUIRE(doctest::Approx(markov_chain.state()[0]).epsilon(0.1) == 250.0f);
 }
 
 TEST_CASE("Matrix squared Euclidean distance is tested.", "[mcmc::stein_variational_gradient_descent_sampler]")
