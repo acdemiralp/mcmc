@@ -1,9 +1,8 @@
 #ifndef MCMC_MARKOV_CHAIN_HPP_
 #define MCMC_MARKOV_CHAIN_HPP_
 
-#include <fstream>
-#include <string>
-#include <vector>
+#include <functional>
+#include <utility>
 
 namespace mcmc
 {
@@ -11,7 +10,11 @@ template<typename state_type>
 class markov_chain
 {
 public:
-  explicit markov_chain  (state_type initial_state ) : state_history_{initial_state}
+  explicit markov_chain  (
+    state_type                                   initial_state ,
+    std::function<void(const state_type& state)> state_callback = {})
+  : state_         (std::move(initial_state))
+  , state_callback_(std::move(state_callback))
   {
     
   }
@@ -24,36 +27,30 @@ public:
   template<typename update_strategy_type, typename... argument_types>
   void                           update       (update_strategy_type& update_strategy, argument_types&&... arguments)
   {
-    state_history_.push_back(update_strategy.apply(state_history_[state_history_.size() - 1], arguments...));
+    state_ = update_strategy.apply(state_, std::forward<argument_types>(arguments)...);
+    if(state_callback_)
+      state_callback_(state_);
   }
   const state_type&              state        () const
   {
-    return state_history_.back();
+    return state_;
   }
-  const std::vector<state_type>& state_history() const
+  void                           subscribe    (
+    std::function<void(const state_type& state)> state_callback,
+    bool                                         emit_current_state = false)
   {
-    return state_history_;
+    state_callback_ = std::move(state_callback);
+    if (emit_current_state && state_callback_)
+      state_callback_(state_);
   }
-  void                           to_csv       (const std::string& filepath)
+  void                           unsubscribe  ()
   {
-    std::ofstream file(filepath);
-    for (auto& state : state_history_)
-    {
-      const auto size = static_cast<std::size_t>(state.size());
-      for (std::size_t i = 0; i < size; ++i)
-      {
-        file << state[i];
-        if (i != size - 1) 
-          file << ", ";
-      }
-      file << "\n";
-    }
+    state_callback_ = {};
   }
 
 protected:
-  // The states prior to the last state have no effect on the update (as per definition of a Markov chain). 
-  // They are nevertheless stored for retrospection purposes.
-  std::vector<state_type> state_history_;
+  state_type                                   state_         ;
+  std::function<void(const state_type& state)> state_callback_;
 };
 }
 

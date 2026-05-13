@@ -23,10 +23,14 @@ void main()
     100.0f);
 
   mcmc::markov_chain<Eigen::VectorXf> markov_chain(initial_state);
+  markov_chain.subscribe(
+    [ ] (const Eigen::VectorXf& state)
+    {
+      std::cout << state.format(Eigen::IOFormat()) << "\n";
+    });
   for(auto i = 0; i < 100000; ++i)
   {
     markov_chain.update(sampler);
-    std::cout << markov_chain.state().format(Eigen::IOFormat()) << "\n";
   }
 }
 ```

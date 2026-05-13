@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <optional>
 
 #include <mcmc/markov_chain.hpp>
 
@@ -12,17 +13,17 @@ TEST_CASE("Markov chain is tested.", "[mcmc::markov_chain]")
     std::array<float, 4>                     initial_state {0.1F, 0.2F, 0.3F, 0.4F};
     mcmc::markov_chain<std::array<float, 4>> markov_chain  (initial_state);
 
-    THEN("The state history size should be equal to one.")
-    {
-      REQUIRE(markov_chain.state_history().size() == 1);
-    }
     THEN("The state should be equal to the initial state.")
     {
       REQUIRE(markov_chain.state() == initial_state);
     }
-    THEN("The last entry in the state history should be equal to the initial state.")
+    THEN("Subscribing can emit the current state immediately.")
     {
-      REQUIRE(markov_chain.state_history().back() == initial_state);
+      std::optional<std::array<float, 4>> observed_state;
+      markov_chain.subscribe([&](const std::array<float, 4>& state) { observed_state = state; }, true);
+
+      REQUIRE(observed_state.has_value());
+      REQUIRE(observed_state.value() == initial_state);
     }
 
     WHEN("The state is updated using a trivial update strategy which only inverts the state.")
@@ -41,17 +42,19 @@ TEST_CASE("Markov chain is tested.", "[mcmc::markov_chain]")
       auto inverted_state = initial_state;
       std::reverse(inverted_state.begin(), inverted_state.end());
 
-      THEN("The state history size should be equal to two.")
-      {
-        REQUIRE(markov_chain.state_history().size() == 2);
-      }
       THEN("The state should be equal to the inverted state.")
       {
         REQUIRE(markov_chain.state() == inverted_state);
       }
-      THEN("The last entry in the state history should be equal to the inverted state.")
+      THEN("A subscriber receives the updated state.")
       {
-        REQUIRE(markov_chain.state_history().back() == inverted_state);
+        std::optional<std::array<float, 4>> observed_state;
+        mcmc::markov_chain<std::array<float, 4>> observed_chain(initial_state);
+        observed_chain.subscribe([&](const std::array<float, 4>& state) { observed_state = state; });
+        observed_chain.update(strategy);
+
+        REQUIRE(observed_state.has_value());
+        REQUIRE(observed_state.value() == inverted_state);
       }
     }
   }
