@@ -9,7 +9,7 @@
 #include <mcmc/markov_chain.hpp>
 #include <mcmc/random_number_generator.hpp>
 
-TEST_CASE("Differential evolution sampler is tested.", "[mcmc::differential_evolution_sampler]")
+TEST_CASE("[mcmc::differential_evolution_sampler] Differential evolution sampler is tested.")
 {
   mcmc::random_number_generator<std::normal_distribution<float>> data_generator(250.0f, 0.1f);
   const auto data = data_generator.generate<Eigen::VectorXf>(100);

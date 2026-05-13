@@ -9,7 +9,7 @@
 #include <mcmc/markov_chain.hpp>
 #include <mcmc/random_number_generator.hpp>
 
-TEST_CASE("Gibbs sampler is tested.", "[mcmc::gibbs_sampler]")
+TEST_CASE("[mcmc::gibbs_sampler] Gibbs sampler is tested.")
 {
   // Three unit vectors parametrized as (theta, phi). Assume they are placed horizontally: v1 v2 v3.
   Eigen::VectorXcf data(3);

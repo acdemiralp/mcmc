@@ -9,7 +9,7 @@
 #include <mcmc/markov_chain.hpp>
 #include <mcmc/random_number_generator.hpp>
 
-TEST_CASE("Adaptive equi-energy sampler is tested.", "[mcmc::adaptive_equi_energy_sampler]")
+TEST_CASE("[mcmc::adaptive_equi_energy_sampler] Adaptive equi-energy sampler is tested.")
 {  
   auto log_mixture_of_gaussians_density = [ ] (const Eigen::VectorXf& x, const Eigen::VectorXf& weights, const Eigen::MatrixXf& mean, const Eigen::VectorXf& variance)
   {

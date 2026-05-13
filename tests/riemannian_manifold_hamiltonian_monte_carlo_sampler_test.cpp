@@ -9,7 +9,7 @@
 #include <mcmc/markov_chain.hpp>
 #include <mcmc/random_number_generator.hpp>
 
-TEST_CASE("Riemannian manifold Hamiltonian Monte Carlo sampler is tested.", "[mcmc::riemannian_manifold_hamiltonian_monte_carlo_sampler]")
+TEST_CASE("[mcmc::riemannian_manifold_hamiltonian_monte_carlo_sampler] Riemannian manifold Hamiltonian Monte Carlo sampler is tested.")
 {
   mcmc::random_number_generator<std::normal_distribution<float>> data_generator(10.0f, 5.0f);
   const auto data = data_generator.generate<Eigen::VectorXf>(1000);

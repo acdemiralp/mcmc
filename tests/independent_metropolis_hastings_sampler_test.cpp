@@ -9,7 +9,7 @@
 #include <mcmc/random_number_generator.hpp>
 #include "mcmc/samplers/independent_metropolis_hastings_sampler.hpp"
 
-TEST_CASE("Independent Metropolis-Hastings sampler is tested.", "[mcmc::independent_metropolis_hastings_sampler]")
+TEST_CASE("[mcmc::independent_metropolis_hastings_sampler] Independent Metropolis-Hastings sampler is tested.")
 {
   mcmc::random_number_generator<std::normal_distribution<float>> data_generator(250.0f, 0.1f);
   const auto data = data_generator.generate<Eigen::VectorXf>(100);
