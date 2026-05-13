@@ -16,14 +16,17 @@ set(PROJECT_SOURCES
   readme.md
 
   include/mcmc/samplers/adaptive_equi_energy_sampler.hpp
+  include/mcmc/samplers/adaptive_metropolis_sampler.hpp
   include/mcmc/samplers/differential_evolution_sampler.hpp
   include/mcmc/samplers/gibbs_sampler.hpp
   include/mcmc/samplers/hamiltonian_monte_carlo_sampler.hpp
   include/mcmc/samplers/independent_metropolis_hastings_sampler.hpp
   include/mcmc/samplers/metropolis_adjusted_langevin_sampler.hpp
   include/mcmc/samplers/metropolis_hastings_sampler.hpp
+  include/mcmc/samplers/multiple_try_metropolis_sampler.hpp
   include/mcmc/samplers/random_walk_metropolis_hastings_sampler.hpp
   include/mcmc/samplers/riemannian_manifold_hamiltonian_monte_carlo_sampler.hpp
+  include/mcmc/samplers/slice_sampler.hpp
   include/mcmc/samplers/stein_variational_gradient_descent_sampler.hpp
   include/mcmc/markov_chain.hpp
   include/mcmc/random_number_generator.hpp
@@ -64,6 +67,7 @@ if(BUILD_TESTS)
 
   set(PROJECT_TEST_SOURCES
     tests/adaptive_equi_energy_sampler_test.cpp
+    tests/adaptive_metropolis_sampler_test.cpp
     tests/differential_evolution_sampler_test.cpp
     tests/gibbs_sampler_test.cpp
     tests/hamiltonian_monte_carlo_sampler_test.cpp
@@ -71,8 +75,10 @@ if(BUILD_TESTS)
     tests/markov_chain_test.cpp
     tests/metropolis_adjusted_langevin_sampler_test.cpp
     tests/metropolis_hastings_sampler_test.cpp
+    tests/multiple_try_metropolis_sampler_test.cpp
     tests/random_walk_metropolis_hastings_sampler_test.cpp
     tests/riemannian_manifold_hamiltonian_monte_carlo_sampler_test.cpp
+    tests/slice_sampler_test.cpp
     tests/stein_variational_gradient_descent_sampler_test.cpp
   )
 
