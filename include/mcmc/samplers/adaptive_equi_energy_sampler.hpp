@@ -31,8 +31,8 @@ public:
     const matrix_type&                                    covariance_matrix          ,
     const scalar_type                                     scale                      = scalar_type(1),
     const scalar_type                                     interaction_probability    = scalar_type(0.1),
-      const std::uint32_t                                   rings                      = 5u,
-      const proposal_distribution_type&                     proposal_distribution      = proposal_distribution_type())
+    const std::uint32_t                                   rings                      = 5u,
+    const proposal_distribution_type&                     proposal_distribution      = proposal_distribution_type())
   : log_target_density_function_(log_target_density_function)
   , covariance_matrix_          ((std::pow(scale, 2) * covariance_matrix).llt().matrixLLT())
   , interaction_probability_    (interaction_probability)
