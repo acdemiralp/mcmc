@@ -62,13 +62,11 @@ public:
     kinetic_energy_     = momentum.dot(inverse_precondition_matrix_ * momentum) / density_type(2);
     
     auto next_state = state;
-    momentum = log_momentum_function_(next_state, momentum);  // initial half-step
     for(auto i = 0u; i < leap_steps_; ++i)
     {
-      next_state += step_size_ * inverse_precondition_matrix_ * momentum;  // full position step
-      momentum    = log_momentum_function_(next_state, momentum);           // half momentum step
-      if (i + 1 < leap_steps_)
-        momentum = log_momentum_function_(next_state, momentum);            // second half-step combines with the first to form a full momentum step at intermediate states; skipped on the last iteration to end with only a half-step
+      momentum    = log_momentum_function_(next_state, momentum);
+      next_state += step_size_ * inverse_precondition_matrix_ * momentum;
+      momentum    = log_momentum_function_(next_state, momentum);
     }
 
     const density_type potential_energy = -log_target_density_function_(next_state);
