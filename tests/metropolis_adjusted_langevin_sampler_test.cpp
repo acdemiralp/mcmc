@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <doctest/doctest.h>
 
 #define _USE_MATH_DEFINES
 
@@ -11,7 +11,7 @@
 #include <mcmc/markov_chain.hpp>
 #include <mcmc/random_number_generator.hpp>
 
-TEST_CASE("Metropolis adjusted Langevin sampler is tested.", "[mcmc::metropolis_adjusted_langevin_sampler]")
+TEST_CASE("[mcmc::metropolis_adjusted_langevin_sampler] Metropolis adjusted Langevin sampler is tested.")
 {
   mcmc::random_number_generator<std::normal_distribution<float>> data_generator(10.0f, 5.0f);
   const auto data = data_generator.generate<Eigen::VectorXf>(1000);
@@ -50,5 +50,5 @@ TEST_CASE("Metropolis adjusted Langevin sampler is tested.", "[mcmc::metropolis_
     std::cout << markov_chain.state().format(Eigen::IOFormat()) << "\n";
   }
 
-  REQUIRE(Approx(markov_chain.state()[0]).epsilon(0.1) == 250.0f);
+  REQUIRE(doctest::Approx(markov_chain.state()[0]).epsilon(0.1) == 10.0f);
 }

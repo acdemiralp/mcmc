@@ -4,7 +4,7 @@
 #include <functional>
 #include <random>
 
-#include <external/Eigen/Core>
+#include <Eigen/Core>
 
 namespace mcmc
 {

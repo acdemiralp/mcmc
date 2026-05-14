@@ -5,7 +5,7 @@
 #include <functional>
 #include <math.h>
 
-#include <external/Eigen/Dense>
+#include <Eigen/Dense>
 
 #include <mcmc/random_number_generator.hpp>
 

@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <doctest/doctest.h>
 
 #define _USE_MATH_DEFINES
 
@@ -9,7 +9,7 @@
 #include <mcmc/markov_chain.hpp>
 #include <mcmc/random_number_generator.hpp>
 
-TEST_CASE("Hamiltonian Monte Carlo sampler is tested.", "[mcmc::hamiltonian_monte_carlo_sampler]")
+TEST_CASE("[mcmc::hamiltonian_monte_carlo_sampler] Hamiltonian Monte Carlo sampler is tested.")
 {
   mcmc::random_number_generator<std::normal_distribution<float>> data_generator(10.0f, 5.0f);
   const auto data = data_generator.generate<Eigen::VectorXf>(1000);
@@ -43,6 +43,6 @@ TEST_CASE("Hamiltonian Monte Carlo sampler is tested.", "[mcmc::hamiltonian_mont
     std::cout << markov_chain.state().format(Eigen::IOFormat()) << "\n";
   }
 
-  REQUIRE(Approx(markov_chain.state()[0]).epsilon(1.0f) == 10.0f);
-  REQUIRE(Approx(markov_chain.state()[1]).epsilon(1.0f) ==  5.0f);
+  REQUIRE(doctest::Approx(markov_chain.state()[0]).epsilon(1.0f) == 10.0f);
+  REQUIRE(doctest::Approx(markov_chain.state()[1]).epsilon(1.0f) ==  5.0f);
 }

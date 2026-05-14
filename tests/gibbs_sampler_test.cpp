@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <doctest/doctest.h>
 
 #define _USE_MATH_DEFINES
 
@@ -9,7 +9,7 @@
 #include <mcmc/markov_chain.hpp>
 #include <mcmc/random_number_generator.hpp>
 
-TEST_CASE("Gibbs sampler is tested.", "[mcmc::gibbs_sampler]")
+TEST_CASE("[mcmc::gibbs_sampler] Gibbs sampler is tested.")
 {
   // Three unit vectors parametrized as (theta, phi). Assume they are placed horizontally: v1 v2 v3.
   Eigen::VectorXcf data(3);
@@ -36,7 +36,7 @@ TEST_CASE("Gibbs sampler is tested.", "[mcmc::gibbs_sampler]")
 
   for (auto i = 0; i < markov_chain.state().size(); ++i)
   {
-    REQUIRE(Approx(markov_chain.state()[i].real()).epsilon(1.0) == 0.0f);
-    REQUIRE(Approx(markov_chain.state()[i].imag()).epsilon(1.0) == 0.0f);
+    REQUIRE(doctest::Approx(markov_chain.state()[i].real()).epsilon(1.0) == 0.0f);
+    REQUIRE(doctest::Approx(markov_chain.state()[i].imag()).epsilon(1.0) == 0.0f);
   }
 }

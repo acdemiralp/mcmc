@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <doctest/doctest.h>
 
 #define _USE_MATH_DEFINES
 
@@ -9,7 +9,7 @@
 #include <mcmc/markov_chain.hpp>
 #include <mcmc/random_number_generator.hpp>
 
-TEST_CASE("Adaptive equi-energy sampler is tested.", "[mcmc::adaptive_equi_energy_sampler]")
+TEST_CASE("[mcmc::adaptive_equi_energy_sampler] Adaptive equi-energy sampler is tested.")
 {  
   auto log_mixture_of_gaussians_density = [ ] (const Eigen::VectorXf& x, const Eigen::VectorXf& weights, const Eigen::MatrixXf& mean, const Eigen::VectorXf& variance)
   {
@@ -60,5 +60,5 @@ TEST_CASE("Adaptive equi-energy sampler is tested.", "[mcmc::adaptive_equi_energ
   }
 
   // Not trivial for mixed distributions.
-  // REQUIRE(Approx(markov_chain.state()[0]).epsilon(0.1) == 250.0f);
+  // REQUIRE(doctest::Approx(markov_chain.state()[0]).epsilon(0.1) == 250.0f);
 }

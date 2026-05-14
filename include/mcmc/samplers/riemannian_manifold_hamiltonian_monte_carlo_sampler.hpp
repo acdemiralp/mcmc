@@ -7,8 +7,8 @@
 #include <functional>
 #include <math.h>
 
-#include <external/Eigen/Dense>
-#include <external/unsupported/Eigen/CXX11/Tensor>
+#include <Eigen/Dense>
+#include <unsupported/Eigen/CXX11/Tensor>
 
 #include <mcmc/random_number_generator.hpp>
 
@@ -50,12 +50,10 @@ public:
       log_target_density_function(state, &gradients);
       for (auto i = 0; i < gradients.size(); ++i) 
       {
-        auto dimensions    = tensor_derivative.dimensions();
-        auto sliced_tensor = tensor_derivative.slice(
-          std::array<std::size_t, 3>{std::size_t(0),             std::size_t(0),             std::size_t(i)}, 
-          std::array<std::size_t, 3>{std::size_t(dimensions[0]), std::size_t(dimensions[1]), std::size_t(1)});
+        auto dimensions = tensor_derivative.dimensions();
+        Eigen::Tensor<density_type, 2> sliced_tensor = tensor_derivative.chip(i, 2);
 
-        Eigen::MatrixXf temp = inverse_tensor_matrix * tensor_to_matrix(sliced_tensor.expression(), dimensions[0], dimensions[1]);
+        Eigen::MatrixXf temp = inverse_tensor_matrix * tensor_to_matrix(sliced_tensor, std::size_t(dimensions[0]), std::size_t(dimensions[1]));
         gradients[i]         = -gradients[i] + density_type(0.5) * (temp.trace() - (momentum.transpose() * temp * inverse_tensor_matrix * momentum));
       }
       return step_size_ * gradients / density_type(2);
@@ -125,8 +123,8 @@ public:
   }
 
 protected:
-  template <std::size_t rank>
-  static auto tensor_to_matrix(const Eigen::Tensor<density_type, rank>& tensor, const std::size_t rows, const std::size_t columns)
+  template <typename tensor_type_>
+  static auto tensor_to_matrix(const tensor_type_& tensor, const std::size_t rows, const std::size_t columns)
   {
     return Eigen::Map<const Eigen::Matrix<density_type, Eigen::Dynamic, Eigen::Dynamic>>(tensor.data(), rows, columns);
   }

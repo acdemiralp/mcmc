@@ -1,11 +1,11 @@
-#include "catch.hpp"
+#include <doctest/doctest.h>
 
 #include <algorithm>
 #include <array>
 
 #include <mcmc/markov_chain.hpp>
 
-TEST_CASE("Markov chain is tested.", "[mcmc::markov_chain]") 
+TEST_CASE("[mcmc::markov_chain] Markov chain is tested.") 
 {
   GIVEN("A Markov Chain with four floating point states with initial probabilities of 0.1, 0.2, 0.3, 0.4 respectively.")
   {

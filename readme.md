@@ -1,5 +1,5 @@
 ## Getting Started ##
-Copy the include folder to your project.
+Install the dependencies with vcpkg from the build directory and configure CMake with the vcpkg toolchain file. The provided bootstrap scripts clone vcpkg under `build/`, install Eigen and doctest (using the local overlay port for Eigen), build the project, and run the test suite.
 
 ## Example Usage (Random Walk a Normal distribution) ##
 ```cpp

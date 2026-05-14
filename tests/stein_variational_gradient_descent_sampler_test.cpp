@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <doctest/doctest.h>
 
 #include <iostream>
 
@@ -6,7 +6,7 @@
 #include <mcmc/markov_chain.hpp>
 #include <mcmc/random_number_generator.hpp>
 
-TEST_CASE("Stein Variational Gradient Descent (SVGD) sampler is tested.", "[mcmc::stein_variational_gradient_descent_sampler]")
+TEST_CASE("[mcmc::stein_variational_gradient_descent_sampler] Stein Variational Gradient Descent (SVGD) sampler is tested.")
 {
   mcmc::random_number_generator<std::normal_distribution<float>> data_generator(10.0f, 1.0f);
   const auto data = data_generator.generate<Eigen::VectorXf>(100);
@@ -34,10 +34,10 @@ TEST_CASE("Stein Variational Gradient Descent (SVGD) sampler is tested.", "[mcmc
   }
 
   // Not trivial for gradient descent.
-  // REQUIRE(Approx(markov_chain.state()[0]).epsilon(0.1) == 250.0f);
+  // REQUIRE(doctest::Approx(markov_chain.state()[0]).epsilon(0.1) == 250.0f);
 }
 
-TEST_CASE("Matrix squared Euclidean distance is tested.", "[mcmc::stein_variational_gradient_descent_sampler]")
+TEST_CASE("[mcmc::stein_variational_gradient_descent_sampler] Matrix squared Euclidean distance is tested.")
 {
   Eigen::MatrixXf input(4, 2);
   for (auto i = 0; i < input.rows(); ++i)

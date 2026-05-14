@@ -7,7 +7,7 @@
 #include <functional>
 #include <random>
 
-#include <external/Eigen/Core>
+#include <Eigen/Core>
 
 #include <mcmc/random_number_generator.hpp>
 
